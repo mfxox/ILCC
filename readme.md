@@ -117,7 +117,7 @@ copy ```config.yaml``` to __ILCC_sample_data_and_result__ folder.
 <img src="readme_files/vis_csv.png" width = "50%" />
 </div>
 * visualization of the segmented results
-```
+```python
     from ILCC import utility
     utility.vis_segments(ind=1)
 ```
@@ -125,7 +125,7 @@ copy ```config.yaml``` to __ILCC_sample_data_and_result__ folder.
 <img src="readme_files/vis_seg.png" width = "50%" />
 </div>
 * visualization of the detected point cloud segment of the chessboard
-```
+```python
     from ILCC import utility
     utility.vis_segments_only_chessboard_color(ind=1)
 ```
@@ -134,7 +134,7 @@ copy ```config.yaml``` to __ILCC_sample_data_and_result__ folder.
 </div>
 
 * visualization of the detected point cloud segment of the chessboard and the estimated chessboard model
-```
+```python
     from ILCC import utility
     utility.vis_ested_pcd_corners(ind=1)
 ```
@@ -143,7 +143,7 @@ copy ```config.yaml``` to __ILCC_sample_data_and_result__ folder.
 </div>
 
 * visualization of all detected chessboards
-```
+```python
     import utility
     utility.vis_all_markers(utility.vis_all_markers(np.arange(1, 21).tolist())
 ```
