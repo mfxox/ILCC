@@ -116,6 +116,7 @@ copy ```config.yaml``` to __ILCC_sample_data_and_result__ folder.
 <div style="text-align: center">
 <img src="readme_files/vis_csv.png" width = "50%" />
 </div>
+
 * visualization of the segmented results
 ```python
     from ILCC import utility
@@ -124,6 +125,7 @@ copy ```config.yaml``` to __ILCC_sample_data_and_result__ folder.
 <div style="text-align: center">
 <img src="readme_files/vis_seg.png" width = "50%" />
 </div>
+
 * visualization of the detected point cloud segment of the chessboard
 ```python
     from ILCC import utility
@@ -152,9 +154,5 @@ copy ```config.yaml``` to __ILCC_sample_data_and_result__ folder.
 <img src="readme_files/all_frames_top.png" width = "65%" />
 </div>
 
-
-
-
-<!-- ## To do
-Integration for ROS -->
+<!-- ## To do Integration for ROS --> 
 
