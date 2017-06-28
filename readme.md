@@ -7,9 +7,30 @@ paper (available soon)
 ## Dependencies
 * Python >= 2.7.9
 * [OpenCV](http://opencv.org/)
+    - for macOS:<br> 
+    ```sh
+    brew install opencv3
+    echo /usr/local/opt/opencv3/lib/python2.7/site-packages >> /usr/local/lib/python2.7/site-packages/opencv3.pth
+    ```
 * [OpenGV](https://laurentkneip.github.io/opengv/page_installation.html)
+    - for macOS:<br> 
+    ```sh
+    git clone https://github.com/mfxox/opengv
+    cd opengv
+    mkdir build && cd build && cmake .. && make && make install
+    ```
 * [Point Cloud Library (PCL)](http://pointclouds.org/)
+    - for macOS:<br> 
+    ```sh
+    brew install pcl
+    ```
 * [PCL python bindings](<https://github.com/mfxox/python-pcl>)
+    - for macOS:<br> 
+    ```sh
+    git clone https://github.com/mfxox/python-pcl
+    cd python-pcl
+    python setup.py install
+    ```
 <!-- * Other python packages: pip install -r [requirements.txt](requirements.txt) -->
 
 
@@ -20,7 +41,7 @@ paper (available soon)
 
 ## Usage
 ### Installation
-```
+```sh
 git clone https://github.com/mfxox/ILCC
 cd ILCC
 python setup.py install
@@ -40,13 +61,17 @@ python setup.py install
 1. Make a folder for example named as __DATA__ and make the image and point cloud folders __DATA/img__ and __DATA/pcd__ respectively. 
 1. Put panoramic images into  __DATA/img__ and point cloud files into  __DATA/pcd__. The files should be named like 00XX.png or 00XX.csv.
 1. Copy config.yaml to __DATA__ and modify config.yaml according to your situation.
-1. ``` cd DATA ```
+1. ```cd DATA ```
 1. Corner detection from images.<br>
     ```python
     from ILCC import img_corners_est
     img_corners_est.detect_img_corners()
     ```
-    Coordinates of corners from images are saved to __DATA/output/img_corners__ with the filename *00XX_img_corners.txt* and images with marked corners are saved in the same folder with the file name *00XX_detected_corners.jpg* if _'output_img_with_dectected_corners'_ in ```config.yaml``` is set to __True__ .
+    Coordinates of corners from images are saved to __DATA/output/img_corners__ with the filename *00XX_img_corners.txt* and images with marked corners are saved in the same folder with the file name *00XX_detected_corners.jpg* if _'output_img_with_dectected_corners'_ in ```config.yaml``` is set to __True__, as shown below.
+    <div style="text-align: center">
+    <img src="readme_files/0001_detected_corners.jpg" width = "50%" />
+    <img src="readme_files/0001_detected_corners_zoom.jpg" width = "24.35%" />
+    </div>
 1. Corner detection from point clouds.<br>
     ```python
     from ILCC import pcd_corners_est
@@ -58,7 +83,11 @@ python setup.py install
     from ILCC import LM_opt
     LM_opt.cal_ext_paras()
     ```
-    The extrinsic calibration results are output in the end of the process and saved with the filename *YYYYMMDD_HHMMSS_calir_result.txt*.  Images of back-projected 3D points with the calculated parameters are saved to __DATA/output__ if 'back_proj_corners' is set to **True**. 
+    The extrinsic calibration results are output in the end of the process and saved with the filename *YYYYMMDD_HHMMSS_calir_result.txt*.  Images of back-projected 3D corners with the calculated parameters are saved to __DATA/output__ if 'back_proj_corners' is set to **True**, as shown below.
+    <div style="text-align: center">
+    <img src="readme_files/0001_cal_backproj.jpg" width = "50%" />
+    <img src="readme_files/0001_cal_backproj_zoom.jpg" width = "24.35%" />
+    </div>
 1. After the aforementioned process, utility module can be imported for visualizing various of results. <br>
     ```python
     from ILCC import utility
@@ -70,7 +99,7 @@ python setup.py install
 ### Sample Data
 The sample data and processing results of detected corners can be downloaded from [here](https://www.dropbox.com/s/m0ogerftqav0fyx/ILCC_sample_data_and_result.zip?dl=0) (185.6M). <br> These data are acquired with the [chessboard file](readme_files/chessboard_A0_0.75_6_8.pdf) which contains 6*8 patterns and the length of one grid is 7.5cm if it is printed by A0 size.
 ### Process
-```
+```sh
 wget https://www.dropbox.com/s/m0ogerftqav0fyx/ILCC_sample_data_and_result.zip
 unzip ILCC_sample_data_and_result.zip
 cd ILCC_sample_data_and_result
@@ -87,7 +116,6 @@ copy ```config.yaml``` to __ILCC_sample_data_and_result__ folder.
 <div style="text-align: center">
 <img src="readme_files/vis_csv.png" width = "50%" />
 </div>
-
 * visualization of the segmented results
 ```
     from ILCC import utility
@@ -96,7 +124,6 @@ copy ```config.yaml``` to __ILCC_sample_data_and_result__ folder.
 <div style="text-align: center">
 <img src="readme_files/vis_seg.png" width = "50%" />
 </div>
-
 * visualization of the detected point cloud segment of the chessboard
 ```
     from ILCC import utility
