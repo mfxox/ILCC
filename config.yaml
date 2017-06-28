@@ -1,0 +1,13 @@
+'image_format': 'jpg' #image format
+'image_res': (4000,8000) #image resolution
+'pattern_size': (6,8)  #number of vertical and horizontal patterns
+'grid_length': 0.075 #the length of one grid of the pattern [m]
+'backend': 'matlab' #backend of detecting corners from the image, opencv 
+'output_img_with_dectected_corners': True #output the image with detected corners
+'back_proj_corners': True #back-project the detected corners of the point cloud to the images
+'laser_beams_num': 32 #The number of the laser beams of the Velodyne LiDAR
+'multi_proc': True #Use multiple processing
+'proc_num': 4 #The number of cores to use for multiple procesisng
+'start_pattern_corner': 0 #The color of the pattern in the left down of the chessboard and 0 for black  1 for white
+'file_name_digits': 4 #filename format
+'not_segmented': False #if the point clouds haven't been segmented, they will be processed. If the point clouds have been segmented, the segmentation process will be skipped

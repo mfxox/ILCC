@@ -1,0 +1,6 @@
+PyYAML>=3.12
+numpy>=1.12.1
+sklearn>=0.0
+scipy>=0.19.0
+transforms3d>=0.3
+matplotlib>=2.0.0
