@@ -9,7 +9,7 @@ paper (available soon)
 * [OpenCV](http://opencv.org/)
 * [OpenGV](https://laurentkneip.github.io/opengv/page_installation.html)
 * [Point Cloud Library (PCL)](http://pointclouds.org/)
-* [PCL python bindings](<https://github.com/strawlab/python-pcl>)
+* [PCL python bindings](<https://github.com/mfxox/python-pcl>)
 <!-- * Other python packages: pip install -r [requirements.txt](requirements.txt) -->
 
 
@@ -44,32 +44,26 @@ python setup.py install
 1. Corner detection from images.<br>
     ```python
     from ILCC import img_corners_est
-    ``` <br>
-    ```python
     img_corners_est.detect_img_corners()
     ```<br>
-    Coordinates of corners from images are saved to __DATA/output/img_corners__ with the filename *00XX_img_corners.txt* and images with marked corners are saved in the same folder with the file name *00XX_detected_corners.jpg* if _'output_img_with_dectected_corners'_ in ```config.yaml``` is set to __True__ .
+Coordinates of corners from images are saved to __DATA/output/img_corners__ with the filename *00XX_img_corners.txt* and images with marked corners are saved in the same folder with the file name *00XX_detected_corners.jpg* if _'output_img_with_dectected_corners'_ in ```config.yaml``` is set to __True__ .
 1. Corner detection from point clouds.<br>
     ```python
     from ILCC import pcd_corners_est
-    ``` <br>
-    ```python
     pcd_corners_est.detect_pcd_corners()
     ```<br>
-    Coordinates of corners from point clouds are save to __output/pcd_seg__ with the filename *00XX_pcd_result.pkl*.  Segments of each point cloud are output to __/DATA/output/pcd_seg/00XX__.
+Coordinates of corners from point clouds are save to __output/pcd_seg__ with the filename *00XX_pcd_result.pkl*.  Segments of each point cloud are output to __/DATA/output/pcd_seg/00XX__.
 1. Non-linear optimization for final extrinsic parameters.<br>
     ```python 
     from ILCC import LM_opt
-    ``` <br>
-    ```python
     LM_opt.cal_ext_paras()
     ```<br>
-    The extrinsic calibration results are output in the end of the process and saved with the filename *YYYYMMDD_HHMMSS_calir_result.txt*.  Images of back-projected 3D points with the calculated parameters are saved to __DATA/output__ if 'back_proj_corners' is set to **True**. 
+The extrinsic calibration results are output in the end of the process and saved with the filename *YYYYMMDD_HHMMSS_calir_result.txt*.  Images of back-projected 3D points with the calculated parameters are saved to __DATA/output__ if 'back_proj_corners' is set to **True**. 
 1. After the aforementioned process, utility module can be imported for visualizing various of results. <br>
     ```python
     from ILCC import utility
     ``` <br>
-    See the example below for how to use.
+See the example below for how to use.
 
 
 ## Example
