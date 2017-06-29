@@ -5,8 +5,6 @@ Created on 3/20/2017 8:58 57PM Wang Weimin
 @author: wangwm
 '''
 import os
-import cv2
-import cPickle
 from pcd_corners_est import exact_full_marker_data
 import numpy as np
 from pcd_corners_est import generate_grid_coords
@@ -15,7 +13,6 @@ import matplotlib
 import vtk
 import config
 from ast import literal_eval as make_tuple
-from LM_opt import roate_with_rt
 import cPickle
 
 params = config.default_params()
