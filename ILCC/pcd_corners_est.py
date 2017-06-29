@@ -1,7 +1,7 @@
 import numpy as np
 from numpy import linalg as LA
 from numpy.linalg import norm, inv
-import  shutil, copy
+import shutil, copy
 from sklearn.decomposition import PCA
 from scipy import spatial
 import matplotlib.path as mplPath
@@ -30,7 +30,7 @@ marker_th_s_min = marker_s * 0.8
 
 # if the point clouds haven't been segmented, they will be processed
 # not_segmented = params['not_segmented']
-not_segmented= True
+not_segmented = True
 
 
 # scanline segment class segmented scanline by scanline

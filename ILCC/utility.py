@@ -14,6 +14,10 @@ import vtk
 import config
 from ast import literal_eval as make_tuple
 import cPickle
+import cv2
+from LM_opt import xyz2angle, voxel2pixel
+import transforms3d
+from matplotlib.pyplot import cm
 
 params = config.default_params()
 marker_size = make_tuple(params["pattern_size"])
@@ -263,7 +267,7 @@ def vis_segments_only_chessboard_color(ind=1):
     seg_folder = "output/pcd_seg/" + str(ind).zfill(4) + "/"
     seg_list = os.listdir(seg_folder)
     chessboard_file_name = \
-    cPickle.load(open("output/pcd_seg/" + str(ind).zfill(4) + "_pcd_result.pkl", "r"))[-1].split("/")[-1]
+        cPickle.load(open("output/pcd_seg/" + str(ind).zfill(4) + "_pcd_result.pkl", "r"))[-1].split("/")[-1]
     for seg in seg_list:
         if seg.split(".")[-1] == "txt":
             if seg == chessboard_file_name:
@@ -504,6 +508,83 @@ def draw_chessboard_model(marker_size=marker_size):
     # plt.axes().set_aspect('equal', 'datalim')
     plt.axis('equal')
     plt.show()
+
+
+def convert_to_edge(file_name):
+    # gray = cv2.imread('lines.jpg')
+    gray = cv2.imread(file_name)
+    edges = cv2.Canny(gray, 50, 150, apertureSize=3)
+    img = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
+    return img
+
+
+def back_project_pcd(img, pcd_arr, color_arr, r_t):
+    rot_mat = np.dot(transforms3d.axangles.axangle2mat([0, 0, 1], r_t[2]),
+                     np.dot(transforms3d.axangles.axangle2mat([0, 1, 0], r_t[1]),
+                            transforms3d.axangles.axangle2mat([1, 0, 0], r_t[0])))
+    transformed_pcd = np.dot(rot_mat, pcd_arr.T).T + r_t[3:]
+
+    transformed_pcd_ls = transformed_pcd.tolist()
+    pcd2angle_s = map(xyz2angle, transformed_pcd_ls)
+    proj_pts = np.array(map(voxel2pixel, pcd2angle_s))
+    print
+    print proj_pts.shape[0], proj_pts.min(axis=0), proj_pts.max(axis=0)
+    for i in xrange(proj_pts.shape[0]):
+        cv2.circle(img, (proj_pts[i][0], proj_pts[i][1]), 5, tuple(color_arr[i].tolist()), -1)
+
+    return img
+
+
+def vis_back_proj(ind=1, img_style="edge", pcd_style="intens"):
+    imgfile = "img/" + str(ind).zfill(params["file_name_digits"]) + "." + params['image_format']
+    if img_style == "edge":
+        gray = cv2.imread(imgfile)
+        edges = cv2.Canny(gray, 50, 150, apertureSize=3)
+        img = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
+    elif img_style == "orig":
+        img = cv2.imread(imgfile)
+    else:
+        print "Please input the right image style"
+
+    csvfile = "pcd/" + str(ind).zfill(params["file_name_digits"]) + ".csv"
+
+    csv = np.genfromtxt(csvfile, delimiter=",", skip_header=1)
+    pcd = csv[:, :3]
+    dis_arr = np.linalg.norm(pcd, axis=1)
+    intens = csv[:, 3]
+
+    filels = os.listdir(".")
+    for file in filels:
+        if file.find("cali_result.txt") > -1:
+            r_t = np.genfromtxt(file, delimiter=',')
+            print "Load ", file, " as the extrinsic calibration parameters!"
+            break
+    else:
+        raise Exception("No calibration file is found!")
+
+    if pcd_style == "intens":
+        pcd_color = np.fliplr((cm.jet(intens.astype(np.float32) / intens.max()) * 255).astype(np.int32)[:, :3])
+    elif pcd_style == "dis":
+        pcd_color = np.fliplr((cm.jet(dis_arr / 10) * 255).astype(np.int32)[:, :3])
+    else:
+        print "Please input the right pcd color style"
+
+    backproj_img = back_project_pcd(img, pcd, pcd_color, r_t)
+
+    cv2.imshow("ind: " + str(ind) + " img_style: " + img_style + " pcd_style: " + pcd_style, backproj_img)
+    k = cv2.waitKey(0)
+    if k == 27:  # wait for ESC key to exit
+        cv2.destroyAllWindows()
+    elif k == ord('s'):  # wait for 's' key to save and exit
+        save_file_name = str(ind).zfill(params["file_name_digits"]) + "_" + img_style + "_" + pcd_style + "." + params[
+            'image_format']
+        cv2.imwrite(save_file_name, img, [cv2.IMWRITE_JPEG_QUALITY, 70])
+        print "The image is saved to ", save_file_name
+        cv2.destroyAllWindows()
+
+
+# vis_back_proj(ind=1, img_style="orig", pcd_style="dis")
+# vis_back_proj(ind=1, img_style="edge", pcd_style="intens")
 
 # vis_all_markers(np.arange(1, 21).tolist())
 # vis_all_markers([1])

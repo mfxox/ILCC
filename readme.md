@@ -31,6 +31,13 @@ paper (available soon)
     cd python-pcl
     python setup.py install
     ```
+* [MATLAB engine for Python](https://www.mathworks.com/help/matlab/matlab_external/install-the-matlab-engine-for-python.html): 
+    - for macOS or Linux:<br> 
+    ```sh
+    cd "matlabroot/extern/engines/python"
+    python setup.py install
+    ```
+    - MATLAB python is used for corner detection from panoramic images. The OpenCV backend is also available which can be set by the __backend__ parameter in ```config.yaml```, however, Opencv may fail to detect the corners. You can also use the example files (__output/img_corners__) of detected corners from the sample data for a try of calibration.
 <!-- * Other python packages: pip install -r [requirements.txt](requirements.txt) -->
 
 
@@ -99,8 +106,17 @@ python setup.py install
 1. After the aforementioned process, utility module can be imported for visualizing various of results. <br>
     ```python
     from ILCC import utility
+    utility.vis_back_proj(ind=1, img_style="edge", pcd_style="intens")
+    utility.vis_back_proj(ind=1, img_style="orig", pcd_style="dis")
     ```
-    See the example below for how to use.
+     The image (see below) with backprojected point cloud with the calculated extrinsic parameters will be showed and press "s" for saving. __img_style__ can be "edge" (edge extracted) or "orig" (original image) and __pcd_style__ can be "dis" (color by distance) or "intens" (color by intensity).
+    <div style="text-align: center">
+    <img src="readme_files/0001_edge_intens.jpg" width = "50%" />
+    <img src="readme_files/0001_orig_dis.jpg" width = "50%" />
+    </div>
+    
+
+1. For 3D visualization, [VTK](https://github.com/Kitware/VTK) >=7.0 is necessary. See the example below for how to use.
 
 
 ## Example
