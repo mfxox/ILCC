@@ -1,7 +1,7 @@
 import numpy as np
 from numpy import linalg as LA
 from numpy.linalg import norm, inv
-import pcl, shutil, copy
+import  shutil, copy
 from sklearn.decomposition import PCA
 from scipy import spatial
 import matplotlib.path as mplPath
@@ -29,7 +29,8 @@ marker_th_l_min = marker_l * 0.8
 marker_th_s_min = marker_s * 0.8
 
 # if the point clouds haven't been segmented, they will be processed
-not_segmented = params['not_segmented']
+# not_segmented = params['not_segmented']
+not_segmented= True
 
 
 # scanline segment class segmented scanline by scanline
@@ -115,6 +116,7 @@ class jdc_segments_collection:
         return result
 
     def exact_planar_normals(self):
+        import pcl
         if self.__csv_path == "":
             print "csv file path is not spcified!"
         raw_data = np.genfromtxt(self.__csv_path, delimiter=",", skip_header=1)
@@ -488,6 +490,7 @@ def exact_full_marker_data(csv_path, marker_pkl):
 
 # get the Hessian normal form of 3D plane
 def get_plane_model(arr):
+    import pcl
     ransac_distance_threshold = 0.05
     point_cloud = pcl.PointCloud(arr.astype(np.float32))
     seg = point_cloud.make_segmenter_normals(ksearch=50)
@@ -660,6 +663,7 @@ def get_gray_thre(intes_arr):
 
 # segment single frame of the point cloud into several segments
 def seg_pcd(csv_path, save_folder_path):
+    import pcl
     seg_num_thre = 3
     jdc_points_num_thres = 0
     seg_count = 0

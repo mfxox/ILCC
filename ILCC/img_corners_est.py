@@ -4,6 +4,7 @@ import os
 from ast import literal_eval as make_tuple
 import config
 import shutil
+import sys
 
 params = config.default_params()
 
@@ -18,7 +19,7 @@ def get_corner_coords(imagefilename, backend=params['backend'], size=make_tuple(
         except ImportError:
             print "matlab.engine can not be found!"
             print "To use detectCheckerboardPoints function of matlab in python, matlab.engine for python should be installed!"
-            exit
+            sys.exit(0)
 
         eng = matlab.engine.start_matlab()
         imagePoints, boardSize, imagesUsed = eng.detectCheckerboardPoints(imagefilename, nargout=3)
