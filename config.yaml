@@ -10,4 +10,3 @@
 'proc_num': 4 #The number of cores to use for multiple procesisng
 'start_pattern_corner': 0 #The color of the pattern in the left down of the chessboard and 0 for black  1 for white
 'file_name_digits': 4 #filename format
-'not_segmented': False #if the point clouds haven't been segmented, they will be processed. If the point clouds have been segmented, the segmentation process will be skipped
