@@ -42,12 +42,12 @@ paper (available soon)
 
 
 ## Optional
-* [MATLAB engine for Python](https://www.mathworks.com/help/matlab/matlab_external/install-the-matlab-engine-for-python.html): Corner detection from images with MATLAB
+<!-- * [MATLAB engine for Python](https://www.mathworks.com/help/matlab/matlab_external/install-the-matlab-engine-for-python.html): Corner detection from images with MATLAB
    - for macOS or Linux:<br> 
     ```sh
     cd "matlabroot/extern/engines/python"
     python setup.py install
-    ```
+    ``` -->
 * [VTK](https://github.com/Kitware/VTK) >=7.0: 3D Visualization
     - for macOS:<br> 
     ```sh
