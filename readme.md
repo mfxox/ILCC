@@ -1,9 +1,17 @@
 # 3D-LiDAR and panoramic camera 
 <!-- based on reflectance intensity of the laser -->
 
-[![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)<br>
-paper (available soon)
+[![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE) 
+paper (available soon)<br>
 <!-- [[paper]](http://www.mdpi.com/journal/remotesensing)-->
+This is an python implementation for the fully automatic and accurate extrinsic calibration of an 3D-LiDAR and panoramic camera based on the laser's reflectance intensity. 
+####The main features of this implementations are:<br>
+1. automatic segmentation of the point cloud acquired by Velodyne 3D LiDAR
+1. automatic detection of the chessboard 
+1. automatic corners detection from the chessboard's point cloud
+1. optimization for extrinsic calibration parameters
+1. various of visualization for 3D point clouds with VTK python wrapper
+
 ## Dependencies
 * Python >= 2.7.9
 * [OpenCV](http://opencv.org/)
@@ -178,5 +186,8 @@ copy ```config.yaml``` to __ILCC_sample_data_and_result__ folder.
 <img src="readme_files/all_frames_top.png" width = "65%" />
 </div>
 
-<!-- ## To do Integration for ROS --> 
+## To do list
+1. uniformity check with chi-square test for chessboard detection
+1. Integration for ROS
+1. Add parameters for HDL-64 and VLP-16-PACK
 
