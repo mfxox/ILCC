@@ -21,6 +21,8 @@ from matplotlib.pyplot import cm
 
 params = config.default_params()
 marker_size = make_tuple(params["pattern_size"])
+(H, W) = make_tuple(params['image_res'])
+
 
 matplotlib.rcParams['text.usetex'] = True
 matplotlib.rcParams['text.latex.unicode'] = True
@@ -570,8 +572,11 @@ def vis_back_proj(ind=1, img_style="edge", pcd_style="intens"):
         print "Please input the right pcd color style"
 
     backproj_img = back_project_pcd(img, pcd, pcd_color, r_t)
+    resized_img_for_view = cv2.resize(backproj_img, (int(W/4.), int(H/4.)))
 
-    cv2.imshow("ind: " + str(ind) + " img_style: " + img_style + " pcd_style: " + pcd_style, backproj_img)
+    window_name = "ind: " + str(ind) + " img_style: " + img_style + " pcd_style: " + pcd_style
+    cv2.namedWindow(window_name, cv2.WND_PROP_FULLSCREEN)
+    cv2.imshow(window_name, resized_img_for_view)
     k = cv2.waitKey(0)
     if k == 27:  # wait for ESC key to exit
         cv2.destroyAllWindows()
@@ -583,7 +588,7 @@ def vis_back_proj(ind=1, img_style="edge", pcd_style="intens"):
         cv2.destroyAllWindows()
 
 
-# vis_back_proj(ind=1, img_style="orig", pcd_style="dis")
+vis_back_proj(ind=1, img_style="orig", pcd_style="dis")
 # vis_back_proj(ind=1, img_style="edge", pcd_style="intens")
 
 # vis_all_markers(np.arange(1, 21).tolist())
