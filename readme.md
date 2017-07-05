@@ -73,10 +73,9 @@ python setup.py install
 
 ### Explanation of files
 ```config.py```: parameter settings <br>
-<!-- ``` main.py```:  call other functions to process from the the corner detection of image and LiDAR to optimization for the final result-->
  ```img_corners_est.py```: estimate corners of chessboard from images with OpenCV or MATLAB<br>
 ```pcd_corners_est.py```: estimate corners of chessboard from the point cloud<br>
-```LM_opt.py```: load corresponding 2D-3D corners, calculate initial values with the PnP method, refine the result with LM method
+```LM_opt.py```: load corresponding 2D-3D corners, calculate initial values with the PnP method, refine the result with LM method<br>
 ```utility.py```: utility functions for various of visualization
 
 
