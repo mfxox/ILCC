@@ -4,8 +4,8 @@
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE) 
 paper (available soon)<br>
 <!-- [[paper]](http://www.mdpi.com/journal/remotesensing)-->
-This is an python implementation for the fully automatic and accurate extrinsic calibration of an 3D-LiDAR and panoramic camera based on the laser's reflectance intensity. 
-####The main features of this implementations are:<br>
+This is an python implementation for the fully automatic and accurate extrinsic calibration of an 3D-LiDAR and panoramic camera based on the laser's reflectance intensity. <br>
+The main features of this implementations are:<br>
 1. automatic segmentation of the point cloud acquired by Velodyne 3D LiDAR
 1. automatic detection of the chessboard 
 1. automatic corners detection from the chessboard's point cloud
