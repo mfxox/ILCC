@@ -134,7 +134,7 @@ def vis_3D_points(full_lidar_arr, color_style="intens_rg"):
         Vertices.InsertCellPoint(id)
 
         rgb_tuple = tuple_ls[k]
-        if vtk.VTK_MAJOR_VERSION == 7:
+        if vtk.VTK_MAJOR_VERSION >= 7:
             Colors.InsertNextTuple(rgb_tuple)
         else:
             Colors.InsertNextTupleValue(rgb_tuple)
@@ -172,7 +172,7 @@ def vis_pcd_color_arr(array_data, color_arr=[46, 204, 113]):
         id = Points.InsertNextPoint(point[0], point[1], point[2])
         Vertices.InsertNextCell(1)
         Vertices.InsertCellPoint(id)
-        if vtk.VTK_MAJOR_VERSION == 7:
+        if vtk.VTK_MAJOR_VERSION >=7:
             Colors.InsertNextTuple(color_arr)
         else:
             Colors.InsertNextTupleValue(color_arr)

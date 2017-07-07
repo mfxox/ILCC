@@ -59,7 +59,7 @@ The main features of this implementations are:<br>
 * [VTK](https://github.com/Kitware/VTK) =7.1.1: 3D Visualization
     - for macOS:<br> 
     ```sh
-    brew install https://raw.githubusercontent.com/Homebrew/homebrew-science/8e8ba44cff3667dd93e42d832ef444af231638cc/vtk.rb
+    brew install vtk
     ```
 
 ## Usage
