@@ -588,7 +588,7 @@ def vis_back_proj(ind=1, img_style="edge", pcd_style="intens"):
         cv2.destroyAllWindows()
 
 
-vis_back_proj(ind=1, img_style="orig", pcd_style="dis")
+# vis_back_proj(ind=1, img_style="orig", pcd_style="dis")
 # vis_back_proj(ind=1, img_style="edge", pcd_style="intens")
 
 # vis_all_markers(np.arange(1, 21).tolist())

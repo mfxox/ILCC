@@ -56,10 +56,11 @@ The main features of this implementations are:<br>
     cd "matlabroot/extern/engines/python"
     python setup.py install
     ``` -->
-* [VTK](https://github.com/Kitware/VTK) >=7.0: 3D Visualization
+* [VTK](https://github.com/Kitware/VTK) =7.1.1: 3D Visualization
     - for macOS:<br> 
     ```sh
-    brew install vtk
+    <!-- brew install vtk -->
+    brew install https://raw.githubusercontent.com/Homebrew/homebrew-science/8e8ba44cff3667dd93e42d832ef444af231638cc/vtk.rb
     ```
 
 ## Usage
