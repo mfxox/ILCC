@@ -178,7 +178,8 @@ copy ```config.yaml``` to __ILCC_sample_data_and_result__ folder.
 * visualization of all detected chessboards
 ```python
     import utility
-    utility.vis_all_markers(utility.vis_all_markers(np.arange(1, 21).tolist())
+    import numpy as np
+    utility.vis_all_markers(utility.vis_all_markers(np.arange(1, 21).tolist()))
 ```
 <div style="text-align: center">
 <img src="readme_files/all_frames_side.png" width = "60%" />

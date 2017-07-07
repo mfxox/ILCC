@@ -230,6 +230,11 @@ def vis_with_renderer(renderer):
             writer.Write()
             print "screenshot saved"
 
+    style = vtk.vtkInteractorStyleSwitch()
+    renderWindowInteractor.SetInteractorStyle(style)
+    # style.SetCurrentStyleToTrackballActor()
+    style.SetCurrentStyleToTrackballCamera()
+
     # Begin Interaction
     renderWindowInteractor.AddObserver(vtk.vtkCommand.KeyPressEvent, get_camera_info, 1)
     renderWindow.Render()
@@ -412,10 +417,10 @@ def transform_grid(args):
     return corners_in_pcd_arr[0]
 
 
-def vis_ested_pcd_corners(pair_ind):
+def vis_ested_pcd_corners(ind=1):
     # pair_ind = 9
-    pcd_result_file = "output/pcd_seg/" + str(pair_ind).zfill(4) + "_pcd_result.pkl"
-    csv_file = "pcd/" + str(pair_ind).zfill(4) + ".csv"
+    pcd_result_file = "output/pcd_seg/" + str(ind).zfill(4) + "_pcd_result.pkl"
+    csv_file = "pcd/" + str(ind).zfill(4) + ".csv"
 
     full_arr = np.genfromtxt(csv_file, delimiter=",", skip_header=1)
 
@@ -449,7 +454,7 @@ def vis_ested_pcd_corners(pair_ind):
 
     show_only_marker = True
     if show_only_marker:
-        marker_full_data_arr = exact_full_marker_data(csv_file, [pcd_result_ls[-1][0].split("proposed/")[-1]])
+        marker_full_data_arr = exact_full_marker_data(csv_file, [pcd_result_ls[-1]])
         actor2 = vis_3D_points(marker_full_data_arr, color_style="intens_rg")
     else:
         actor2 = vis_3D_points(full_arr, color_style="intens_rg")
@@ -477,12 +482,17 @@ def vis_ested_pcd_corners(pair_ind):
             writer.SetInputData(w2if.GetOutput())
             writer.Write()
             print "screenshot saved"
+    style = vtk.vtkInteractorStyleSwitch()
+    iren.SetRenderWindow(renWin)
+    iren.SetInteractorStyle(style)
+    # style.SetCurrentStyleToTrackballActor()
+    style.SetCurrentStyleToTrackballCamera()
 
     iren.AddObserver(vtk.vtkCommand.KeyPressEvent, get_camera_info, 1)
 
     iren.Initialize()
     renWin.Render()
-    renWin.SetWindowName(str(pair_ind).zfill(4))
+    renWin.SetWindowName(str(ind).zfill(4))
 
     iren.Start()
 
@@ -575,7 +585,7 @@ def vis_back_proj(ind=1, img_style="edge", pcd_style="intens"):
     resized_img_for_view = cv2.resize(backproj_img, (int(W/4.), int(H/4.)))
 
     window_name = "ind: " + str(ind) + " img_style: " + img_style + " pcd_style: " + pcd_style
-    cv2.namedWindow(window_name, cv2.WND_PROP_FULLSCREEN)
+    cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
     cv2.imshow(window_name, resized_img_for_view)
     k = cv2.waitKey(0)
     if k == 27:  # wait for ESC key to exit
@@ -596,4 +606,4 @@ def vis_back_proj(ind=1, img_style="edge", pcd_style="intens"):
 # vis_segments_only_chessboard_color(4)
 # vis_csv_pcd(ind=1)
 # vis_segments(ind=1)
-# vis_ested_pcd_corners(pair_ind=1)
+# vis_ested_pcd_corners(ind=1)
