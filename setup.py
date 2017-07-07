@@ -10,7 +10,7 @@ setup(name='ILCC',
       version=version,
       description="Intensity-based_Lidar_Camera_Calibration",
       long_description="""\
-An package for automatic 3D_LiDAR-Panoramic_camera extrinsic calibration based on """,
+An package for automatic 3D_LiDAR-Panoramic_camera extrinsic calibration based on corner detection from the sparse point cloud with reflectance intensity. """,
       classifiers=[], # 
       keywords='lidar panoramic camera calibration extrinsic visualization',
       author='wangwm',
@@ -20,7 +20,7 @@ An package for automatic 3D_LiDAR-Panoramic_camera extrinsic calibration based o
       packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
       include_package_data=True,
       zip_safe=False,
-      install_requires=[required],
+      install_requires=required,
       entry_points="""
       # -*- Entry points: -*-
       """,
