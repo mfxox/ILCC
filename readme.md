@@ -190,4 +190,5 @@ copy ```config.yaml``` to __ILCC_sample_data_and_result__ folder.
 1. uniformity check with chi-square test for chessboard detection
 1. Integration for ROS
 1. Add parameters for HDL-64 and VLP-16-PACK
+1. Add optimization for perspective camera model
 
