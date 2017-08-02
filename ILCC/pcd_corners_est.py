@@ -12,6 +12,7 @@ import os
 from ast import literal_eval as make_tuple
 from multiprocessing import Pool
 import re
+from scipy import stats
 
 import config
 
@@ -31,6 +32,19 @@ marker_th_s_min = marker_s * 0.8
 # if the point clouds haven't been segmented, they will be processed
 # not_segmented = params['not_segmented']
 not_segmented = True
+
+# get vertical and horizontal scan resolution for jdc and agglomeration
+if params['LiDAR_type'] == 'hdl32':
+    h_coef = 2 * np.sin(np.deg2rad(360. / (70000. / 32.)) / 2)
+    v_coef = 2 * np.sin(np.deg2rad(41.34 / 31.) / 2.)
+elif params['LiDAR_type'] == 'hdl64':
+    h_coef = 2 * np.sin(np.deg2rad(0.08) / 2)
+    v_coef = 2 * np.sin(np.deg2rad(0.4 / 2.))
+elif params['LiDAR_type'] == 'vlp16_puck':
+    h_coef = 2 * np.sin(np.deg2rad(0.25) / 2)
+    v_coef = 2 * np.sin(np.deg2rad(2) / 2.)
+else:
+    AssertionError("Please input the right LiDAR_type in the config.yaml")
 
 
 # scanline segment class segmented scanline by scanline
@@ -92,6 +106,8 @@ class jdc_segments_collection:
         self.l = params['laser_beams_num']
         self.__g_th = -1000
         self.__r_th = -1000
+        self.__horizontal_scan_coef = h_coef
+        self.__vertical_scan_coef = v_coef
 
     def set_random_color(self, t_f):
         self.__random_seg_color = t_f
@@ -164,7 +180,7 @@ class jdc_segments_collection:
                 else:
                     b = data_arr_by_id_list[0, :]
                 dis = LA.norm(a - b)
-                current_thre = 0.00287979 * LA.norm(a) * self.__jdc_thre_ratio
+                current_thre = self.__horizontal_scan_coef * LA.norm(a) * self.__jdc_thre_ratio
                 if dis >= current_thre:
 
                     stop_point_pos = i
@@ -241,10 +257,8 @@ class jdc_segments_collection:
             for i in np.arange(search_num, -1, -1):
                 tmp_seg = sorted_segs_list[searchlist[i]]
 
-                agglo_error = list()
-                agglo_orth_bool = list()
-                # 0.0232129 appr. = 41.34/31*np.pi/180
-                current_agglo_thre = 0.0232129 * LA.norm(tmp_seg.centroid) * self.__agglomerative_cluster_th_ratio
+                current_agglo_thre = self.__vertical_scan_coef * LA.norm(
+                    tmp_seg.centroid) * self.__agglomerative_cluster_th_ratio
                 # print "number of clusters in clustered_seg: "+str(len(clustered_seg))
                 for each in clustered_seg:
                     if LA.norm(tmp_seg.centroid - each.centroid) < current_agglo_thre and calc_vectors_pca_correlation(
@@ -337,6 +351,8 @@ def calc_vectors_pca_correlation(a, b):
             return False
     else:
         return False
+
+
 
 
 # determine whether a segment is the potential chessboard's point cloud

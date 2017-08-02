@@ -4,13 +4,14 @@
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE) 
 paper (available soon)<br>
 <!-- [[paper]](http://www.mdpi.com/journal/remotesensing)-->
-This is an python implementation for the fully automatic and accurate extrinsic calibration of an 3D-LiDAR and panoramic camera based on the laser's reflectance intensity. <br>
+This is an python implementation for the fully automatic and accurate extrinsic calibration of an 3D-LiDAR and the camera based on the laser's reflectance intensity. <br>
 The main features of this implementations are:<br>
-1. automatic segmentation of the point cloud acquired by Velodyne 3D LiDAR
+1. automatic segmentation of the point cloud acquired by Velodyne 3D LiDAR 
 1. automatic detection of the chessboard 
 1. automatic corners detection from the chessboard's point cloud
 1. optimization for extrinsic calibration parameters
-1. various of visualization for 3D point clouds with VTK python wrapper
+1. various of visualization for 3D point clouds with VTK python wrapper<br>
+These features are implemented for VLP-16, HDL-32e and HDL-64e. However, they tested only with HDL-32e. We are appreciated if one could provide data of other types for testing.
 
 ## Dependencies
 * Python >= 2.7.9
@@ -189,6 +190,6 @@ copy ```config.yaml``` to __ILCC_sample_data_and_result__ folder.
 ## To do list
 1. uniformity check with chi-square test for chessboard detection
 1. Integration for ROS
-1. Add parameters for HDL-64 and VLP-16-PACK
+1. <del>Add parameters for HDL-64 and VLP-16-PACK</del>(20170614)
 1. Add optimization for perspective camera model
 
