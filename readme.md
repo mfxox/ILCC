@@ -197,6 +197,8 @@ copy ```config.yaml``` to __ILCC_sample_data_and_result__ folder.
 ## Contributing
 We are appreciated if you could share the collected data with different sizes or patterns of chessboard or other types of LiDAR sensors. We will acknowledge your contribution in the tested conditions' list.
 
+If you have any question, please discuss in [Issues](https://github.com/mfxox/ILCC/issues) or contact [me](mailto:weimin@ucl.nagoya-u.ac.jp) directly.
+
 ## To do list
 1. uniformity check with chi-square test for chessboard detection
 1. Integration for ROS
