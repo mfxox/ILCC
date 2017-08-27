@@ -1,4 +1,4 @@
-# 3D-LiDAR and panoramic camera  [paper]
+# 3D-LiDAR and camera extrinsic calibration [[paper](http://www.mdpi.com/2072-4292/9/8/851/htm)]
 <!-- based on reflectance intensity of the laser -->
 
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE) 
@@ -195,7 +195,7 @@ copy ```config.yaml``` to __ILCC_sample_data_and_result__ folder.
 |  1  | Velodyne <br> HDL-32e |   Ladybug3   |      8*6     |       7.5       |      1.2 ~ 2.6      | [link](https://www.dropbox.com/s/m0ogerftqav0fyx/ILCC_sample_data_and_result.zip?dl=0) | [mfxox](https://github.com/mfxox) |
 
 ## Contributing
-We are appreciated if you could share the collected data with different sizes or patterns of chessboard or other types of LiDAR sensors. We will acknowledge your contribution in the tested conditions' list.
+We are appreciated if you could share the collected data with different sizes or patterns of chessboard or other types of LiDAR sensors. We will acknowledge your contributions in the tested conditions' list.
 
 If you have any question, please discuss in [Issues](https://github.com/mfxox/ILCC/issues) or contact [me](mailto:weimin@ucl.nagoya-u.ac.jp) directly.
 
