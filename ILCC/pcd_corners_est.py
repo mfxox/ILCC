@@ -32,7 +32,7 @@ marker_th_s_min = marker_s * 0.8
 # if the point clouds haven't been segmented, they will be processed
 # not_segmented = params['not_segmented']
 not_segmented = True
-
+debug = False
 # get vertical and horizontal scan resolution for jdc and agglomeration
 if params['LiDAR_type'] == 'hdl32':
     h_coef = 2 * np.sin(np.deg2rad(360. / (70000. / 32.)) / 2)
@@ -93,7 +93,7 @@ class jdc_segments_collection:
         self.segs_list = list()
         self.__plane_detection_points_thre = 30
         self.__normals_list = list()
-        self.__jdc_thre_ratio = 5
+        self.__jdc_thre_ratio = params['jdc_thre_ratio']
         self.__jdc_angle_thre = 0.5
         self.__csv_path = ""
         self.__palnar_normal_num = 100
@@ -102,7 +102,7 @@ class jdc_segments_collection:
         self.__human_length_th_upper = 60
         self.__point_in_plane_threshold = 0.01
         self.__random_seg_color = True
-        self.__agglomerative_cluster_th_ratio = 5
+        self.__agglomerative_cluster_th_ratio = params['agglomerative_cluster_th_ratio']
         self.l = params['laser_beams_num']
         self.__g_th = -1000
         self.__r_th = -1000
@@ -353,13 +353,74 @@ def calc_vectors_pca_correlation(a, b):
         return False
 
 
+if debug:
+    import vtk
+
+
+    def show_pcd_ndarray(array_data, color_arr=[0, 255, 0]):
+        all_rows = array_data.shape[0]
+        Colors = vtk.vtkUnsignedCharArray()
+        Colors.SetNumberOfComponents(3)
+        Colors.SetName("Colors")
+
+        Points = vtk.vtkPoints()
+        Vertices = vtk.vtkCellArray()
+
+        for k in xrange(all_rows):
+            point = array_data[k, :]
+            id = Points.InsertNextPoint(point[0], point[1], point[2])
+            Vertices.InsertNextCell(1)
+            Vertices.InsertCellPoint(id)
+            if vtk.VTK_MAJOR_VERSION > 6:
+                Colors.InsertNextTuple(color_arr)
+            else:
+                Colors.InsertNextTupleValue(color_arr)
+
+            dis_tmp = np.sqrt((point ** 2).sum(0))
+            # Colors.InsertNextTupleValue([0,255-dis_tmp/max_dist*255,0])
+            # Colors.InsertNextTupleValue([255-abs(point[0]/x_max*255),255-abs(point[1]/y_max*255),255-abs(point[2]/z_max*255)])
+            # Colors.InsertNextTupleValue([255-abs(point[0]/x_max*255),255,255])
+
+        polydata = vtk.vtkPolyData()
+        polydata.SetPoints(Points)
+        polydata.SetVerts(Vertices)
+        polydata.GetPointData().SetScalars(Colors)
+        polydata.Modified()
+
+        mapper = vtk.vtkPolyDataMapper()
+        if vtk.VTK_MAJOR_VERSION <= 5:
+            mapper.SetInput(polydata)
+        else:
+            mapper.SetInputData(polydata)
+        mapper.SetColorModeToDefault()
+        actor = vtk.vtkActor()
+        actor.SetMapper(mapper)
+        actor.GetProperty().SetPointSize(5)
+
+        # Renderer
+        renderer = vtk.vtkRenderer()
+        renderer.AddActor(actor)
+        renderer.SetBackground(.2, .3, .4)
+        renderer.ResetCamera()
+
+        # Render Window
+        renderWindow = vtk.vtkRenderWindow()
+        renderWindow.AddRenderer(renderer)
+
+        # Interactor
+        renderWindowInteractor = vtk.vtkRenderWindowInteractor()
+        renderWindowInteractor.SetRenderWindow(renderWindow)
+
+        # Begin Interaction
+        renderWindow.Render()
+        renderWindowInteractor.Start()
 
 
 # determine whether a segment is the potential chessboard's point cloud
 def is_marker(file_full_path, range_res, points_num_th=400):
     # result = False
     jdcs_collection = cPickle.load(open(file_full_path, 'rb'))
-    debug = False
+
     if debug:
         print file_full_path
     tmp_list = list()
@@ -377,7 +438,7 @@ def is_marker(file_full_path, range_res, points_num_th=400):
     # check whether is a plane
     pca = PCA(n_components=3)
     pca.fit(arr)
-    if pca.explained_variance_ratio_[2] > 0.01:
+    if pca.explained_variance_ratio_[2] > params['chessboard_detect_planar_PCA_ratio']:
         return False
 
     # map to 2D
@@ -409,6 +470,8 @@ def is_marker(file_full_path, range_res, points_num_th=400):
             print file_full_path
             print "passed"
             print "pca: ", pca.explained_variance_ratio_
+            if debug:
+                show_pcd_ndarray(arr)
             return True
         else:
             return False
@@ -418,7 +481,7 @@ def is_marker(file_full_path, range_res, points_num_th=400):
 
 
 # find the point cloud of chessboard from segmented results
-def find_marker(file_path, range_res=3):
+def find_marker(file_path, csv_path, range_res=params['marker_range_limit']):
     file_list = os.listdir(file_path)
     res_ls = []
     for file in file_list:
@@ -432,53 +495,18 @@ def find_marker(file_path, range_res=3):
     if len(res_ls) > 1:
         print "one than one candicate of the marker is found!"
         print res_ls
-        print "The segment with most uniform points distribution is considered as the marker"
+        print "The segment with most uniform intensity distribution is considered as the marker"
         num_ls = []
         for file in res_ls:
-            a = cPickle.load(open(file, "r"))
-            ls = []
-            for line in a:
-                ls.extend(line)
-            arr = np.array(ls)
-            pca = PCA(n_components=3)
-            pca.fit(arr)
-            if pca.explained_variance_ratio_[2] > 0.01:
-                # print "not plane"
-                return False
-
-            # map to 2D
-            tmp = np.dot(pca.components_, arr.T).T
-            points = tmp[:, :2]
-
-            # substract the mean point
-            points -= points.mean(axis=0)
-
-            bbx = points.max(axis=0) - points.min(axis=0)
-
-            if (marker_th_l_min < bbx[0] < marker_th_l_max and marker_th_s_min < bbx[1] < marker_th_s_max) or (
-                                marker_th_s_min < bbx[0] < marker_th_s_max and marker_th_l_min < bbx[
-                        1] < marker_th_l_max):
-                # analyse the distribution of the points in four quadrants
-                all_points_num = points.shape[0]
-                x_lin = [points.min(axis=0)[0], (points.min(axis=0)[0] + points.max(axis=0)[0]) / 2,
-                         points.max(axis=0)[0]]
-                y_lin = [points.min(axis=0)[1], (points.min(axis=0)[1] + points.max(axis=0)[1]) / 2,
-                         points.max(axis=0)[1]]
-
-                num_in_quadrant_ls = []
-                for i in xrange(2):
-                    x_prd = [x_lin[i], x_lin[i + 1]]
-                    for j in xrange(2):
-                        y_prd = [y_lin[j], y_lin[j + 1]]
-                        num_in_quadrant_ls.append(np.count_nonzero(
-                            (points[:, 0] >= x_prd[0]) & (points[:, 0] <= x_prd[1]) & (points[:, 1] >= y_prd[0]) & (
-                                points[:, 1] <= y_prd[1])))
-                print "num_in_quadrant_ls:", num_in_quadrant_ls
-                normed = np.array(num_in_quadrant_ls, dtype=np.float32) / sum(num_in_quadrant_ls)
-            num_ls.append(normed.max() - normed.min())
-
-        res_ls = [res_ls[np.argmin(num_ls)]]
-        # print res_ls
+            arr = exact_full_marker_data(csv_path, [file])
+            intensity_arr = arr[:, 3]
+            hist, bin_edges = np.histogram(intensity_arr, 100)
+            if debug:
+                print hist, bin_edges
+            num_ls.append(len(np.nonzero(hist)[0]))
+        res_ls = [res_ls[np.argmax(num_ls)]]
+        if debug:
+            print res_ls
 
     assert len(res_ls) == 1
     print "marker is found!"
@@ -650,11 +678,18 @@ def generate_grid_coords(x_res=marker_size[0], y_res=marker_size[1], grid_len=pa
 
 # analyze the intensity distribution of the chessboard's point cloud to determine the gray zone
 def get_gray_thre(intes_arr):
+    gray_zone_debug = False
     # find the gray period of intensity (if some point has the intensity in this period, the weight for this kind of pints will be zero)
     gmm = get_gmm_para(np.expand_dims(intes_arr, axis=1))
     tmp_thres = gmm.means_.mean()
+    if gray_zone_debug:
+        print "Mean of intensity by GMM: ", tmp_thres
 
     hist, bin_edges = np.histogram(intes_arr, 100)
+    if gray_zone_debug:
+        import matplotlib.pyplot as plt
+        plt.hist(intes_arr, 100)
+        plt.show()
     order = np.argsort(hist)
 
     low_intensity = -1
@@ -673,6 +708,9 @@ def get_gray_thre(intes_arr):
 
         if high_found and low_found:
             break
+    else:
+        print "gray zone is not well detected!"
+        print low_intensity, high_intensity
 
     return low_intensity, high_intensity
 
@@ -754,7 +792,7 @@ def run(csv_path, save_folder_path="output/pcd_seg/", size=marker_size):
     parts = csv_path.split("/")
     find_marker_path = save_folder_path + parts[-1].split(".")[0] + "/"
 
-    marker_pkl = find_marker(file_path=os.path.abspath(find_marker_path) + "/")
+    marker_pkl = find_marker(file_path=os.path.abspath(find_marker_path) + "/", csv_path=csv_path)
     marker_full_data_arr = exact_full_marker_data(csv_path, marker_pkl)
 
     # fit the points to the plane model

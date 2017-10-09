@@ -597,13 +597,15 @@ def vis_back_proj(ind=1, img_style="edge", pcd_style="intens"):
         print "The image is saved to ", save_file_name
         cv2.destroyAllWindows()
 
+# if __name__ == "__main__":
+    # vis_back_proj(ind=1, img_style="orig", pcd_style="dis")
+    # vis_back_proj(ind=1, img_style="edge", pcd_style="intens")
 
-# vis_back_proj(ind=1, img_style="orig", pcd_style="dis")
-# vis_back_proj(ind=1, img_style="edge", pcd_style="intens")
-
-# vis_all_markers(np.arange(1, 21).tolist())
-# vis_all_markers([1])
-# vis_segments_only_chessboard_color(4)
-# vis_csv_pcd(ind=1)
-# vis_segments(ind=1)
-# vis_ested_pcd_corners(ind=1)
+    # vis_all_markers(np.arange(1, 21).tolist())
+    # vis_all_markers([1])
+    # vis_segments_only_chessboard_color(1)
+    # for i in xrange(4):
+    #     vis_ested_pcd_corners(i+1)
+    # vis_csv_pcd(ind=1)
+    # vis_segments(ind=2)
+    # vis_ested_pcd_corners(ind=2)

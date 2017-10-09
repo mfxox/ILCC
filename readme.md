@@ -1,4 +1,4 @@
-# 3D-LiDAR and camera extrinsic calibration [[paper](http://www.mdpi.com/2072-4292/9/8/851/htm)]
+# 3D-LiDAR and camera extrinsic calibration [[paper](http://www.mdpi.com/2072-4292/9/8/851/htm)][[arxiv](https://arxiv.org/abs/1708.05514)]
 <!-- based on reflectance intensity of the laser -->
 
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE) 
