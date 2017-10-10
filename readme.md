@@ -83,6 +83,7 @@ python setup.py install
 
 
 ### Process data
+**Rosbag data need to be converted to the csv file in which points are in time order.**
 1. Make a folder for example named as __DATA__ and make the image and point cloud folders __DATA/img__ and __DATA/pcd__ respectively. 
 1. Put panoramic images into  __DATA/img__ and point cloud files into  __DATA/pcd__. The files should be named like 00XX.png or 00XX.csv.
 1. Copy config.yaml to __DATA__ and modify config.yaml according to your situation.
@@ -188,6 +189,20 @@ copy ```config.yaml``` to __ILCC_sample_data_and_result__ folder.
 <img src="readme_files/all_frames_side.png" width = "60%" />
 <img src="readme_files/all_frames_top.png" width = "65%" />
 </div>
+
+## Troubleshooting
+1. The chessboard was not segmented properly.
+* Make sure all points in the *csv* file are according to the time order. 
+* Check the *LiDAR_type* and *laser_beams_num* in ```config.yaml``` are the same with your setup.
+* Try to increase *jdc_thre_ratio* and *agglomerative_cluster_th_ratio* in ```config.yaml``` if the chessboard is over-segmented. Otherwise, decrease them if the chessboard is under-segmented.
+
+2. The chessboard seems to be segmented properly by visualizing the segmentation result with **utility.vis_segments**, but "no marker is found" or the wrong segment is found.
+* Check *pattern_size* and *grid_length* in ```config.yaml``` are set properly.
+* Check the approximate distance of the chessboard is less than *marker_range_limit* in  ```config.yaml```.
+* Try to increase the value of *chessboard_detect_planar_PCA_ratio* in ```config.yaml``` if the point cloud of the chessboard is very noisy in the normal vector direction.
+
+For further questions, please discuss in [Issues](https://github.com/mfxox/ILCC/issues).
+
 
 ## Tested conditions
 | No. |    LiDAR Model   | Camera Model | Pattern Size | Grid Length[cm] | Distance Range[m] |                                       Data source                                      |               Author              |
