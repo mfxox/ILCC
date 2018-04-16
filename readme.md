@@ -2,6 +2,9 @@
 <!-- based on reflectance intensity of the laser -->
 
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE) 
+
+[TOC]
+
 ## Introduction
 
 <!-- [[paper]](http://www.mdpi.com/journal/remotesensing)-->
@@ -15,7 +18,11 @@ The main features of this implementations are:<br>
 1. various of visualization for 3D point clouds with VTK python wrapper<br>
 These features are implemented for VLP-16, HDL-32e and HDL-64e. However, they tested only with HDL-32e. We are appreciated if one could provide data of other types for testing.
 
-## Dependencies
+## Installation
+
+### Dependencies
+If you have any problem with installation please ask in issues.
+
 * Python >= 2.7.9
 * [OpenCV](http://opencv.org/)
     - for macOS:<br> 
@@ -50,9 +57,7 @@ These features are implemented for VLP-16, HDL-32e and HDL-64e. However, they te
     ```
     - MATLAB python is used for corner detection from panoramic images. The OpenCV backend is also available which can be set by the __backend__ parameter in ```config.yaml```, however, Opencv may fail to detect the corners. You can also use the example files (__output/img_corners__) of detected corners from the sample data for a try of calibration.
 <!-- * Other python packages: pip install -r [requirements.txt](requirements.txt) -->
-
-
-## Optional
+### Optional
 <!-- * [MATLAB engine for Python](https://www.mathworks.com/help/matlab/matlab_external/install-the-matlab-engine-for-python.html): Corner detection from images with MATLAB
    - for macOS or Linux:<br> 
     ```sh
@@ -64,9 +69,7 @@ These features are implemented for VLP-16, HDL-32e and HDL-64e. However, they te
     ```sh
     brew install vtk
     ```
-
-## Usage
-### Installation
+### Installation of ILCC    
 ```sh
 git clone https://github.com/mfxox/ILCC
 cd ILCC
@@ -74,6 +77,8 @@ python setup.py install
 ```
 
 
+
+## Usage
 ### Explanation of files
 ```config.py```: parameter settings <br>
  ```img_corners_est.py```: estimate corners of chessboard from images with OpenCV or MATLAB<br>

@@ -1,4 +1,5 @@
 import numpy as np
+print np
 import cv2
 import os
 from ast import literal_eval as make_tuple
@@ -49,12 +50,13 @@ def get_corner_coords(imagefilename, backend=params['backend'], size=make_tuple(
         return np_imagePoints
 
     elif backend == "opencv":
-        print "OpenCV" + str(cv2.__version__) + " is used as backend for detecting corners"
+        print "OpenCV " + str(cv2.__version__) + " is used as backend for detecting corners"
         img = cv2.imread(imagefilename)
         print img.shape
 
         ret, corners = cv2.findChessboardCorners(img, size,
-                                                 flags=cv2.cv.CV_CALIB_CB_ADAPTIVE_THRESH + cv2.cv.CV_CALIB_CB_NORMALIZE_IMAGE + cv2.CALIB_CB_FAST_CHECK)
+                                                 flags=cv2.CALIB_CB_ADAPTIVE_THRESH + cv2.CALIB_CB_NORMALIZE_IMAGE + cv2.CALIB_CB_FAST_CHECK)
+        #flags=cv2.cv.CV_CALIB_CB_ADAPTIVE_THRESH + cv2.cv.CV_CALIB_CB_NORMALIZE_IMAGE + cv2.CALIB_CB_FAST_CHECK
         if not ret:
             print "Corners can not be detected!"
             return None
@@ -84,12 +86,16 @@ def detect_img_corners():
         shutil.rmtree("output/img_corners")
     os.makedirs("output/img_corners")
     for i in ls:
-        imagefilename = "img/" + str(i).zfill(4) + "." + params['image_format']
-        corner_points = get_corner_coords(imagefilename)
+        try:
+            imagefilename = "img/" + str(i).zfill(4) + "." + params['image_format']
+            corner_points = get_corner_coords(imagefilename)
 
-        # print corner_points
-        save_points_filename = "output/img_corners/" + str(i).zfill(4) + "_img_corners" + ".txt"
-        np.savetxt(save_points_filename, corner_points, delimiter=",")
+            # print corner_points
+            save_points_filename = "output/img_corners/" + str(i).zfill(4) + "_img_corners" + ".txt"
+            np.savetxt(save_points_filename, corner_points, delimiter=",")
+        except:
+            continue
+
 
 
 if __name__ == '__main__':

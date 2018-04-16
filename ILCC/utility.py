@@ -19,10 +19,12 @@ from LM_opt import xyz2angle, voxel2pixel
 import transforms3d
 from matplotlib.pyplot import cm
 
+from sklearn.decomposition import PCA
+import matplotlib.path as mplPath
+
 params = config.default_params()
 marker_size = make_tuple(params["pattern_size"])
 (H, W) = make_tuple(params['image_res'])
-
 
 matplotlib.rcParams['text.usetex'] = True
 matplotlib.rcParams['text.latex.unicode'] = True
@@ -172,7 +174,7 @@ def vis_pcd_color_arr(array_data, color_arr=[46, 204, 113]):
         id = Points.InsertNextPoint(point[0], point[1], point[2])
         Vertices.InsertNextCell(1)
         Vertices.InsertCellPoint(id)
-        if vtk.VTK_MAJOR_VERSION >=7:
+        if vtk.VTK_MAJOR_VERSION >= 7:
             Colors.InsertNextTuple(color_arr)
         else:
             Colors.InsertNextTupleValue(color_arr)
@@ -239,6 +241,84 @@ def vis_with_renderer(renderer):
     renderWindowInteractor.AddObserver(vtk.vtkCommand.KeyPressEvent, get_camera_info, 1)
     renderWindow.Render()
     renderWindowInteractor.Start()
+
+
+def proj_pcd_2_pix(pcd_arr):
+    if params["camera_type"] == "panoramic":
+        angs_ls = map(xyz2angle, pcd_arr.tolist())
+        pix_ls = (np.array(map(voxel2pixel, angs_ls))).tolist()
+    elif params['camera_type'] == "perspective":
+        intrinsic_paras_tuple = make_tuple(params['instrinsic_para'])
+        intrinsic_paras = np.array(intrinsic_paras_tuple).reshape(3, 3)
+        cam_coord_pcd = pcd_arr.copy()
+
+        pcd_to_pix = (np.dot(intrinsic_paras, cam_coord_pcd.T)).T
+
+        proj_pts = (pcd_to_pix / pcd_to_pix[:, 2].reshape(-1, 1))[:, :2].astype(np.int16)
+        pix_ls = proj_pts.tolist()
+    else:
+        raise Exception("Camera type not correctly defined!")
+    return pix_ls
+
+
+def remove_occlusion_of_chessboard(pcd_arr, corners_in_pcd_arr):
+    occlu_thres = 0.1
+    pcd_ls = pcd_arr.tolist()
+    pix_ls = proj_pcd_2_pix(pcd_arr)
+    ind_ls = []
+    pca = PCA(n_components=3)
+    pca.fit(corners_in_pcd_arr)
+    transed_corners_in_pcd_arr = np.dot(pca.components_, corners_in_pcd_arr.T).T
+    center = transed_corners_in_pcd_arr.mean(axis=0)
+
+    bound = np.dot(pca.components_.T,
+                   (np.array(
+                       [[-0.3, -0.225, 0], [-0.3, 0.225, 0], [0.3, 0.225, 0], [0.3, -0.225, 0]]) * 1.05 + center).T).T
+
+    if params["camera_type"] == "panoramic":
+        bound_on_image = np.fliplr(np.array(map(voxel2pixel, map(xyz2angle, bound.tolist()))))
+    elif params['camera_type'] == "perspective":
+        intrinsic_paras_tuple = make_tuple(params['instrinsic_para'])
+        intrinsic_paras = np.array(intrinsic_paras_tuple).reshape(3, 3)
+
+        pcd_to_pix = (np.dot(intrinsic_paras, bound.T)).T
+        inds = np.where(pcd_arr[:, 2] > 0)
+        pcd_ls = pcd_arr[inds].tolist()
+        pix_ls = np.array(pix_ls)[inds].tolist()
+        print "before removal: ", len(pcd_ls)
+        proj_pts = (pcd_to_pix / pcd_to_pix[:, 2].reshape(-1, 1))[:, :2].astype(np.int16)
+        bound_on_image = np.fliplr(proj_pts)
+        # bound_on_image = proj_pts
+
+        # print bound_on_image
+    else:
+        raise Exception("Camera type not correctly defined!")
+
+    polygon_path = mplPath.Path(bound_on_image.tolist())
+
+    for i in xrange(len(pcd_ls)):
+        pix = list(reversed(pix_ls[i]))
+        # print pix
+        if polygon_path.contains_point(pix):
+            point_2_board_dis = abs(np.dot(pca.components_[2], pcd_ls[i] - corners_in_pcd_arr.mean(axis=0)))
+            # print point_2_board_dis
+            # print pix_ls[i]
+            if point_2_board_dis <= occlu_thres:
+                if params["camera_type"] == "panoramic":
+                    ind_ls.append(i)
+                elif params['camera_type'] == "perspective":
+                    ind_ls.append(inds[0][i])
+                else:
+                    raise Exception("Camera type not correctly defined!")
+        else:
+            if params["camera_type"] == "panoramic":
+                ind_ls.append(i)
+            elif params['camera_type'] == "perspective":
+                ind_ls.append(inds[0][i])
+            else:
+                raise Exception("Camera type not correctly defined!")
+
+    return np.array(ind_ls)
 
 
 # visualize csv file of i-th point cloud
@@ -482,6 +562,7 @@ def vis_ested_pcd_corners(ind=1):
             writer.SetInputData(w2if.GetOutput())
             writer.Write()
             print "screenshot saved"
+
     style = vtk.vtkInteractorStyleSwitch()
     iren.SetRenderWindow(renWin)
     iren.SetInteractorStyle(style)
@@ -530,19 +611,88 @@ def convert_to_edge(file_name):
     return img
 
 
-def back_project_pcd(img, pcd_arr, color_arr, r_t):
+def back_project_pcd(img, pcd_arr, color_arr, r_t, i):
+    # print pcd_arr
     rot_mat = np.dot(transforms3d.axangles.axangle2mat([0, 0, 1], r_t[2]),
                      np.dot(transforms3d.axangles.axangle2mat([0, 1, 0], r_t[1]),
                             transforms3d.axangles.axangle2mat([1, 0, 0], r_t[0])))
     transformed_pcd = np.dot(rot_mat, pcd_arr.T).T + r_t[3:]
 
-    transformed_pcd_ls = transformed_pcd.tolist()
-    pcd2angle_s = map(xyz2angle, transformed_pcd_ls)
-    proj_pts = np.array(map(voxel2pixel, pcd2angle_s))
+    # transformed_pcd_ls = transformed_pcd.tolist()
+    transformed_pcd_ls = pcd_arr.tolist()
+
+    if False: #whether remove occlussions by the chessboard
+        if params["camera_type"] == "panoramic":
+            pcd2angle_s = map(xyz2angle, transformed_pcd_ls)
+            proj_pts = np.array(map(voxel2pixel, pcd2angle_s))
+            point_s = 5
+        elif params['camera_type'] == "perspective":
+            intrinsic_paras_tuple = make_tuple(params['instrinsic_para'])
+            intrinsic_paras = np.array(intrinsic_paras_tuple).reshape(3, 3)
+            cam_coord_pcd = transformed_pcd.copy()
+
+            # print cam_coord_pcd
+
+            print "before filtering z: ", cam_coord_pcd.shape
+            # cam_coord_pcd = cam_coord_pcd[np.where(cam_coord_pcd[:, 2] < 0)]
+            # cam_coord_pcd = cam_coord_pcd[:20000, :]
+            print cam_coord_pcd
+
+            inds = np.where(cam_coord_pcd[:, 2] > 0.2)
+            cam_coord_pcd = cam_coord_pcd[inds]
+            color_arr = color_arr[inds]
+            print cam_coord_pcd
+            print "after filtering z: ", cam_coord_pcd.shape
+
+            pcd_to_pix = (np.dot(intrinsic_paras, cam_coord_pcd.T)).T
+            pcd_to_pix = pcd_to_pix[np.where(pcd_to_pix[:, 2] > 0)]
+            proj_pts = (pcd_to_pix / pcd_to_pix[:, 2].reshape(-1, 1))[:, :2].astype(np.int16)
+
+            point_s = 3
+            print proj_pts
+
+            print proj_pts.shape
+        else:
+            raise Exception("Camera type not correctly defined!")
+    else:
+        point_s = 1
+        chessboard_result_file_path = "output/pcd_seg/" + str(i).zfill(4) + "_pcd_result.pkl"
+        chessboard_result_file = cPickle.load(open(chessboard_result_file_path, "r"))
+        rot1 = chessboard_result_file[0]
+        t1 = chessboard_result_file[1].reshape(1, 3)
+        # print "rot1*rot1.T: ", np.dot(rot1, rot1.T)
+        rot2 = chessboard_result_file[2]
+        t2 = chessboard_result_file[3].reshape(1, 3)
+        corner_arr = chessboard_result_file[4].reshape(-1, 2)
+        num = corner_arr.shape[0]
+        corner_arr = np.hstack([corner_arr, np.zeros(num).reshape(num, 1)])
+
+        rot_mat = np.dot(transforms3d.axangles.axangle2mat([0, 0, 1], r_t[2]),
+                         np.dot(transforms3d.axangles.axangle2mat([0, 1, 0], r_t[1]),
+                                transforms3d.axangles.axangle2mat([1, 0, 0], r_t[0])))
+        trans_arr = np.zeros([4, 4])
+        trans_arr[:3, :3] = rot_mat
+        trans_arr[:3, 3] = np.array(r_t[3:])
+        trans_arr[3, 3] = 1
+        trans_matrix = np.asmatrix(trans_arr)
+
+        corners_in_pcd_arr = np.dot(np.dot(rot2.T, corner_arr.T).T - t2 + t1, rot1)
+        corners_in_pcd_arr = (trans_matrix[:3, :3] * np.asmatrix(corners_in_pcd_arr).T).T + trans_matrix[:3, 3].T
+        corners_in_pcd_arr = np.array(corners_in_pcd_arr)
+
+        # print "before removal: ", transformed_pcd.shape
+        inds = remove_occlusion_of_chessboard(transformed_pcd, corners_in_pcd_arr)
+        print "inds:", inds
+        proj_pts = np.array(proj_pcd_2_pix(transformed_pcd))[inds].astype(np.int32)
+        print "after removal: ", proj_pts.shape
+        color_arr = color_arr[inds]
+
+
     print
     print proj_pts.shape[0], proj_pts.min(axis=0), proj_pts.max(axis=0)
+    print
     for i in xrange(proj_pts.shape[0]):
-        cv2.circle(img, (proj_pts[i][0], proj_pts[i][1]), 5, tuple(color_arr[i].tolist()), -1)
+        cv2.circle(img, (proj_pts[i][0], proj_pts[i][1]), point_s, tuple(color_arr[i].tolist()), -1)
 
     return img
 
@@ -581,8 +731,8 @@ def vis_back_proj(ind=1, img_style="edge", pcd_style="intens"):
     else:
         print "Please input the right pcd color style"
 
-    backproj_img = back_project_pcd(img, pcd, pcd_color, r_t)
-    resized_img_for_view = cv2.resize(backproj_img, (int(W/4.), int(H/4.)))
+    backproj_img = back_project_pcd(img, pcd, pcd_color, r_t, ind)
+    resized_img_for_view = cv2.resize(backproj_img, (int(W / 4.), int(H / 4.)))
 
     window_name = "ind: " + str(ind) + " img_style: " + img_style + " pcd_style: " + pcd_style
     cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
@@ -597,15 +747,14 @@ def vis_back_proj(ind=1, img_style="edge", pcd_style="intens"):
         print "The image is saved to ", save_file_name
         cv2.destroyAllWindows()
 
-# if __name__ == "__main__":
-    # vis_back_proj(ind=1, img_style="orig", pcd_style="dis")
-    # vis_back_proj(ind=1, img_style="edge", pcd_style="intens")
 
-    # vis_all_markers(np.arange(1, 21).tolist())
+if __name__ == "__main__":
+    vis_back_proj(ind=1, img_style="orig", pcd_style="dis")
+    # vis_back_proj(ind=1, img_style="edge", pcd_style="dis")
+
+    # vis_all_markers(np.arange(1, 5).tolist())
     # vis_all_markers([1])
     # vis_segments_only_chessboard_color(1)
-    # for i in xrange(4):
-    #     vis_ested_pcd_corners(i+1)
     # vis_csv_pcd(ind=1)
-    # vis_segments(ind=2)
-    # vis_ested_pcd_corners(ind=2)
+    # vis_segments(ind=1)
+    # vis_ested_pcd_corners(ind=1)
