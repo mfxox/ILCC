@@ -4,7 +4,7 @@ import sys, os
 with open('requirements.txt') as f:
     required = f.read().splitlines()
 
-version = '0.1'
+version = '0.2'
 
 setup(name='ILCC',
       version=version,
