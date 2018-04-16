@@ -1,15 +1,10 @@
-# 3D-LiDAR and camera extrinsic calibration [[paper](http://www.mdpi.com/2072-4292/9/8/851/htm)][[arxiv](https://arxiv.org/abs/1708.05514)]
+# 3D-LiDAR and panoramic camera 
 <!-- based on reflectance intensity of the laser -->
 
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE) 
-
-[TOC]
-
-## Introduction
-
+paper (available soon)<br>
 <!-- [[paper]](http://www.mdpi.com/journal/remotesensing)-->
 This is an python implementation for the fully automatic and accurate extrinsic calibration of an 3D-LiDAR and the camera based on the laser's reflectance intensity. <br>
-__The paper is available [here](http://www.mdpi.com/2072-4292/9/8/851/htm).__<br>
 The main features of this implementations are:<br>
 1. automatic segmentation of the point cloud acquired by Velodyne 3D LiDAR 
 1. automatic detection of the chessboard 
@@ -18,11 +13,16 @@ The main features of this implementations are:<br>
 1. various of visualization for 3D point clouds with VTK python wrapper<br>
 These features are implemented for VLP-16, HDL-32e and HDL-64e. However, they tested only with HDL-32e. We are appreciated if one could provide data of other types for testing.
 
-## Installation
 
-### Dependencies
-If you have any problem with installation please ask in issues.
+##Updates
+* 2018-04-16 (Release of Version 0.2) 
+    - Implement calibration for perspective camera.
+    - Add the sample data and results for perspective camera calibration.
+    - Add the feature hiding occluded parts by the chessboard when project the point cloud to the image.
+    - Some other minor changes. 
 
+
+## Dependencies
 * Python >= 2.7.9
 * [OpenCV](http://opencv.org/)
     - for macOS:<br> 
@@ -57,7 +57,9 @@ If you have any problem with installation please ask in issues.
     ```
     - MATLAB python is used for corner detection from panoramic images. The OpenCV backend is also available which can be set by the __backend__ parameter in ```config.yaml```, however, Opencv may fail to detect the corners. You can also use the example files (__output/img_corners__) of detected corners from the sample data for a try of calibration.
 <!-- * Other python packages: pip install -r [requirements.txt](requirements.txt) -->
-### Optional
+
+
+## Optional
 <!-- * [MATLAB engine for Python](https://www.mathworks.com/help/matlab/matlab_external/install-the-matlab-engine-for-python.html): Corner detection from images with MATLAB
    - for macOS or Linux:<br> 
     ```sh
@@ -69,7 +71,9 @@ If you have any problem with installation please ask in issues.
     ```sh
     brew install vtk
     ```
-### Installation of ILCC    
+
+## Usage
+### Installation
 ```sh
 git clone https://github.com/mfxox/ILCC
 cd ILCC
@@ -77,8 +81,6 @@ python setup.py install
 ```
 
 
-
-## Usage
 ### Explanation of files
 ```config.py```: parameter settings <br>
  ```img_corners_est.py```: estimate corners of chessboard from images with OpenCV or MATLAB<br>
@@ -88,7 +90,6 @@ python setup.py install
 
 
 ### Process data
-**Rosbag data need to be converted to the csv file in which points are in time order.**
 1. Make a folder for example named as __DATA__ and make the image and point cloud folders __DATA/img__ and __DATA/pcd__ respectively. 
 1. Put panoramic images into  __DATA/img__ and point cloud files into  __DATA/pcd__. The files should be named like 00XX.png or 00XX.csv.
 1. Copy config.yaml to __DATA__ and modify config.yaml according to your situation.
@@ -139,12 +140,24 @@ python setup.py install
 ### Sample Data
 The sample data and processing results of detected corners can be downloaded from [here](https://www.dropbox.com/s/m0ogerftqav0fyx/ILCC_sample_data_and_result.zip?dl=0) (181M). <br> These data are acquired with the [chessboard file](readme_files/chessboard_A0_0.75_6_8.pdf) which contains 6*8 patterns and the length of one grid is 7.5cm if it is printed by A0 size.
 ### Process
+* For panoramic camera
 ```sh
 wget https://www.dropbox.com/s/m0ogerftqav0fyx/ILCC_sample_data_and_result.zip
 unzip ILCC_sample_data_and_result.zip
 cd ILCC_sample_data_and_result
 ```
 copy ```config.yaml``` to __ILCC_sample_data_and_result__ folder.
+
+
+* For perspective camera
+```sh
+wget https://www.dropbox.com/s/et0o4k2sp485nz1/ILCC_sample_perspective_data.zip
+unzip ILCC_sample_perspective_data.zip
+cd ILCC_sample_perspective_data
+```
+
+copy ```config.yaml``` to ILCC_sample_data_and_result folder.<br/>
+Set __camera_type__ to 'perpsective' and input the intrinsic parameters to __instrinsic_para__ by modifying  ```config.yaml``` .
 
 
 ### Visualization ([VTK](https://github.com/Kitware/VTK) >=7.0 is necessary)
@@ -195,33 +208,9 @@ copy ```config.yaml``` to __ILCC_sample_data_and_result__ folder.
 <img src="readme_files/all_frames_top.png" width = "65%" />
 </div>
 
-## Troubleshooting
-1. The chessboard was not segmented properly.
-* Make sure all points in the *csv* file are according to the time order. 
-* Check the *LiDAR_type* and *laser_beams_num* in ```config.yaml``` are the same with your setup.
-* Try to increase *jdc_thre_ratio* and *agglomerative_cluster_th_ratio* in ```config.yaml``` if the chessboard is over-segmented. Otherwise, decrease them if the chessboard is under-segmented.
-
-2. The chessboard seems to be segmented properly by visualizing the segmentation result with **utility.vis_segments**, but "no marker is found" or the wrong segment is found.
-* Check *pattern_size* and *grid_length* in ```config.yaml``` are set properly.
-* Check the approximate distance of the chessboard is less than *marker_range_limit* in  ```config.yaml```.
-* Try to increase the value of *chessboard_detect_planar_PCA_ratio* in ```config.yaml``` if the point cloud of the chessboard is very noisy in the normal vector direction.
-
-For further questions, please discuss in [Issues](https://github.com/mfxox/ILCC/issues).
-
-
-## Tested conditions
-| No. |    LiDAR Model   | Camera Model | Pattern Size | Grid Length[cm] | Distance Range[m] |                                       Data source                                      |               Author              |
-|:---:|:----------------:|:------------:|:------------:|:---------------:|:-----------------:|:--------------------------------------------------------------------------------------:|:---------------------------------:|
-|  1  | Velodyne <br> HDL-32e |   Ladybug3   |      8*6     |       7.5       |      1.2 ~ 2.6      | [link](https://www.dropbox.com/s/m0ogerftqav0fyx/ILCC_sample_data_and_result.zip?dl=0) | [mfxox](https://github.com/mfxox) |
-
-## Contributing
-We are appreciated if you could share the collected data with different sizes or patterns of chessboard or other types of LiDAR sensors. We will acknowledge your contributions in the tested conditions' list.
-
-If you have any question, please discuss in [Issues](https://github.com/mfxox/ILCC/issues) or contact [me](mailto:weimin@ucl.nagoya-u.ac.jp) directly.
-
 ## To do list
 1. uniformity check with chi-square test for chessboard detection
 1. Integration for ROS
 1. <del>Add parameters for HDL-64 and VLP-16-PACK</del>(20170614)
-1. Add optimization for perspective camera model
+1. <del>Add optimization for perspective camera model</del>(20180416)
 
