@@ -1,10 +1,12 @@
-# 3D-LiDAR and panoramic camera 
+# 3D-LiDAR and camera extrinsic calibration [[paper](http://www.mdpi.com/2072-4292/9/8/851/htm)][[arxiv](https://arxiv.org/abs/1708.05514)]
 <!-- based on reflectance intensity of the laser -->
 
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE) 
-paper (available soon)<br>
+## Introduction
+
 <!-- [[paper]](http://www.mdpi.com/journal/remotesensing)-->
 This is an python implementation for the fully automatic and accurate extrinsic calibration of an 3D-LiDAR and the camera based on the laser's reflectance intensity. <br>
+__The paper is available [here](http://www.mdpi.com/2072-4292/9/8/851/htm).__<br>
 The main features of this implementations are:<br>
 1. automatic segmentation of the point cloud acquired by Velodyne 3D LiDAR 
 1. automatic detection of the chessboard 
