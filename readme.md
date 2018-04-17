@@ -138,11 +138,11 @@ python setup.py install
     <em>Project points to the original image with coloring by distance.  The occluded part by the chessboard is not hided.</em>
     <br>
     <img src="readme_files/0001_orig_dis_hide_occlusion.jpg" width = "80%" /><br>
-    <em>The occluded part by the chessboard is hided. The occluded part by the chessboard is hided by setting  the parameter hide_occlussion_by_marker True. <br>
-    Check the upper part of the chessboard in the two images above.  <em>
+    <em>The occluded part by the chessboard is hided. The occluded part by the chessboard is hided by setting  the parameter hide_occlussion_by_marker True.</em> <br>
+    Check the upper part of the chessboard in the two images above.  </em>
     <br>
     <img src="readme_files/0001_edge_intens_hide_occlusion.jpg" width = "80%" /><br>
-    <em>Project points to the edge image with coloring by intensity. Occluded points by the chessboard are hided.</span>
+    <em>Project points to the edge image with coloring by intensity. Occluded points by the chessboard are hided.</em>
     </p>
     </div>
     <div style="text-align: center">
@@ -151,7 +151,7 @@ python setup.py install
     <img src="readme_files/0001_orig_dis_hide_occlusion.png" width = "20%" />
     <img src="readme_files/0001_edge_intens.png" width = "20%" />
     <img src="readme_files/0001_edge_intens_hide_occlusion.png" width = "20%" /> <br>
-    <em>Results of perspective images. From left to right: [color: distance, original image], [color: distance, original image, hide occlusion], [color: intensity, edge image], [color: intensity, edge image, hide occlusion].  
+    <em>Results of perspective images. From left to right: [color: distance, original image], [color: distance, original image, hide occlusion], [color: intensity, edge image], [color: intensity, edge image, hide occlusion]. </em>
     </p>
     </div>
 <!-- 
@@ -168,7 +168,7 @@ python setup.py install
 
 ## Example
 ### Sample Data
-The sample data and processing results of detected corners can be downloaded from [here](https://www.dropbox.com/s/m0ogerftqav0fyx/ILCC_sample_data_and_result.zip?dl=0) (181M) for panoramic image and here[https://www.dropbox.com/s/et0o4k2sp485nz1/ILCC_sample_perspective_data.zip?dl=0] (29MB) for perspective image. <br> These data are acquired with the [chessboard file](readme_files/chessboard_A0_0.75_6_8.pdf) which contains 6*8 patterns and the length of one grid is 7.5cm if it is printed by A0 size.
+The sample data and processing results of detected corners can be downloaded from [here](https://www.dropbox.com/s/m0ogerftqav0fyx/ILCC_sample_data_and_result.zip?dl=0) (181M) for panoramic image and [here](https://www.dropbox.com/s/et0o4k2sp485nz1/ILCC_sample_perspective_data.zip?dl=0) (29M) for perspective image. <br> These data are acquired with the [chessboard file](readme_files/chessboard_A0_0.75_6_8.pdf) which contains 6*8 patterns and the length of one grid is 7.5cm if it is printed by A0 size.
 ### Process
 * For panoramic camera
 ```sh
