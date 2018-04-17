@@ -16,7 +16,7 @@ These features are implemented for VLP-16, HDL-32e and HDL-64e. However, they te
 
 ##Updates
 * 2018-04-16 (Release of Version 0.2) 
-    - Implement calibration for perspective camera.
+    - Implement calibration for monocular camera.
     - Add sample data and results for perspective camera calibration.
     - Add a feature that can hide occluded parts by the chessboard when project the point cloud to the image.
     - Some other minor changes. 
@@ -91,9 +91,11 @@ python setup.py install
 
 ### Process data
 1. Make a folder for example named as __DATA__ and make the image and point cloud folders __DATA/img__ and __DATA/pcd__ respectively. 
+
 1. Put panoramic images into  __DATA/img__ and point cloud files into  __DATA/pcd__. The files should be named like 00XX.png or 00XX.csv.
-1. Copy config.yaml to __DATA__ and modify config.yaml according to your situation.
-1. ```cd DATA ```
+
+1. ```cd DATA ``` and copy config.yaml to __DATA__ and modify config.yaml according to your situation.
+
 1. Corner detection from images.<br>
     ```python
     from ILCC import img_corners_est
@@ -121,6 +123,7 @@ python setup.py install
     <img src="readme_files/0001_cal_backproj_zoom.jpg" width = "24.35%" /><br>
     <!-- <em>Example of panoramic image. </em> -->
     </div>
+
 1. After the aforementioned process, utility module can be imported for visualizing various of results. <br>
     ```python
     from ILCC import utility
@@ -131,19 +134,17 @@ python setup.py install
      The image (see below) with back-projected point cloud with the calculated extrinsic parameters will be showed and press "s" for saving. __img_style__ can be "edge" (edge extracted) or "orig" (original image) and __pcd_style__ can be "dis" (color by distance) or "intens" (color by intensity).
     <div style="text-align: center">
     <p align="center"> 
-    <img src="readme_files/0001_orig_dis.jpg" width = "100%" />
+    <img src="readme_files/0001_orig_dis.jpg" width = "80%" /><br>
     <em>Project points to the original image with coloring by distance.  The occluded part by the chessboard is not hided.</em>
     <br>
-
-    <img src="readme_files/0001_orig_dis_hide_occlusion.jpg" width = "100%" />
+    <img src="readme_files/0001_orig_dis_hide_occlusion.jpg" width = "80%" /><br>
     <em>The occluded part by the chessboard is hided. The occluded part by the chessboard is hided by setting  the parameter hide_occlussion_by_marker True. <br>
     Check the upper part of the chessboard in the two images above.  <em>
 
-    <img src="readme_files/0001_edge_intens_hide_occlusion.jpg" width = "100%" />
+    <img src="readme_files/0001_edge_intens_hide_occlusion.jpg" width = "80%" /><br>
     <em>Project points to the edge image with coloring by intensity. Occluded points by the chessboard are hided.</span>
     </p>
     </div>
-
     <div style="text-align: center">
     <p align="center"> 
     <img src="readme_files/0001_orig_dis.png" width = "20%" />
@@ -151,7 +152,6 @@ python setup.py install
     <img src="readme_files/0001_edge_intens.png" width = "20%" />
     <img src="readme_files/0001_edge_intens_hide_occlusion.png" width = "20%" /> <br>
     <em>Results of perspective images. From left to right: [color: distance, original image], [color: distance, original image, hide occlusion], [color: intensity, edge image], [color: intensity, edge image, hide occlusion].  
-
     </p>
     </div>
 <!-- 
@@ -162,14 +162,13 @@ python setup.py install
     <em>Hide the occluded part by the chessboard by setting __hide_occlussion_by_marker__ True.</em>
     </p>
     </div> -->
-    
 
 1. For 3D visualization, [VTK](https://github.com/Kitware/VTK) >=7.0 is necessary. See the example below for how to use.
 
 
 ## Example
 ### Sample Data
-The sample data and processing results of detected corners can be downloaded from [here](https://www.dropbox.com/s/m0ogerftqav0fyx/ILCC_sample_data_and_result.zip?dl=0) (181M). <br> These data are acquired with the [chessboard file](readme_files/chessboard_A0_0.75_6_8.pdf) which contains 6*8 patterns and the length of one grid is 7.5cm if it is printed by A0 size.
+The sample data and processing results of detected corners can be downloaded from [here](https://www.dropbox.com/s/m0ogerftqav0fyx/ILCC_sample_data_and_result.zip?dl=0) (181M) for panoramic image and here[https://www.dropbox.com/s/et0o4k2sp485nz1/ILCC_sample_perspective_data.zip?dl=0] (29MB) for perspective image. <br> These data are acquired with the [chessboard file](readme_files/chessboard_A0_0.75_6_8.pdf) which contains 6*8 patterns and the length of one grid is 7.5cm if it is printed by A0 size.
 ### Process
 * For panoramic camera
 ```sh
@@ -238,6 +237,34 @@ Set __camera_type__ to 'perpsective' and input the intrinsic parameters to __ins
 <img src="readme_files/all_frames_side.png" width = "60%" />
 <img src="readme_files/all_frames_top.png" width = "65%" />
 </div>
+
+
+## Troubleshooting
+1. The chessboard was not segmented properly.
+* Make sure all points in the *csv* file are according to the time order. 
+* Check the *LiDAR_type* and *laser_beams_num* in ```config.yaml``` are the same with your setup.
+* Try to increase *jdc_thre_ratio* and *agglomerative_cluster_th_ratio* in ```config.yaml``` if the chessboard is over-segmented. Otherwise, decrease them if the chessboard is under-segmented.
+
+2. The chessboard seems to be segmented properly by visualizing the segmentation result with **utility.vis_segments**, but "no marker is found" or the wrong segment is found.
+* Check *pattern_size* and *grid_length* in ```config.yaml``` are set properly.
+* Check the approximate distance of the chessboard is less than *marker_range_limit* in  ```config.yaml```.
+* Try to increase the value of *chessboard_detect_planar_PCA_ratio* in ```config.yaml``` if the point cloud of the chessboard is very noisy in the normal vector direction.
+* Try to decrease the value of *least_marker_points_num* in ```config.yaml``` if the chessboard is very far.
+
+For further questions, please discuss in [Issues](https://github.com/mfxox/ILCC/issues).
+
+
+## Tested conditions
+| No. |    LiDAR Model   | Camera Model | Pattern Size | Grid Length[cm] | Distance Range[m] |                                       Data source                                      |               Author              |
+|:---:|:----------------:|:------------:|:------------:|:---------------:|:-----------------:|:--------------------------------------------------------------------------------------:|:---------------------------------:|
+|  1  | Velodyne <br> HDL-32e |   Ladybug3 (panoramic)   |      8*6     |       7.5       |      1.2 ~ 2.6      | [link](https://www.dropbox.com/s/m0ogerftqav0fyx/ILCC_sample_data_and_result.zip?dl=0) | [mfxox](https://github.com/mfxox) |
+|  2  | Velodyne <br> HDL-32e |   One monocular camera of the Ladybug3   |      8*6     |       7.5       |      1.2 ~ 2.6      | [link](https://www.dropbox.com/s/et0o4k2sp485nz1/ILCC_sample_perspective_data.zip?dl=0) | [mfxox](https://github.com/mfxox) |
+
+## Contributing
+We are appreciated if you could share the collected data with different sizes or patterns of chessboard or other types of LiDAR sensors. We will acknowledge your contributions in the tested conditions' list.
+
+If you have any question, please discuss in [Issues](https://github.com/mfxox/ILCC/issues) or contact [me](mailto:weimin@ucl.nagoya-u.ac.jp) directly.
+
 
 ## To do list
 <!-- 1. Uniformity check with chi-square test for chessboard detection -->
