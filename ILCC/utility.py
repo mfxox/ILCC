@@ -18,9 +18,11 @@ import cv2
 from LM_opt import xyz2angle, voxel2pixel
 import transforms3d
 from matplotlib.pyplot import cm
+import ast
 
 from sklearn.decomposition import PCA
 import matplotlib.path as mplPath
+import warnings
 
 params = config.default_params()
 marker_size = make_tuple(params["pattern_size"])
@@ -611,17 +613,24 @@ def convert_to_edge(file_name):
     return img
 
 
-def back_project_pcd(img, pcd_arr, color_arr, r_t, i):
+def find_latest(cali_file_ls):
+    number_ls = []
+    for file in cali_file_ls:
+        tmp_ls = file.split("_")
+        number_ls.append(ast.literal_eval(tmp_ls[0] + "." + tmp_ls[1]))
+    return cali_file_ls[np.array(number_ls).argmax()]
+
+
+def back_project_pcd(img, pcd_arr, color_arr, r_t, i, hide_occlussion_by_marker):
     # print pcd_arr
     rot_mat = np.dot(transforms3d.axangles.axangle2mat([0, 0, 1], r_t[2]),
                      np.dot(transforms3d.axangles.axangle2mat([0, 1, 0], r_t[1]),
                             transforms3d.axangles.axangle2mat([1, 0, 0], r_t[0])))
     transformed_pcd = np.dot(rot_mat, pcd_arr.T).T + r_t[3:]
 
-    # transformed_pcd_ls = transformed_pcd.tolist()
     transformed_pcd_ls = pcd_arr.tolist()
 
-    if False: #whether remove occlussions by the chessboard
+    if not hide_occlussion_by_marker:  # whether remove occlussions by the chessboard
         if params["camera_type"] == "panoramic":
             pcd2angle_s = map(xyz2angle, transformed_pcd_ls)
             proj_pts = np.array(map(voxel2pixel, pcd2angle_s))
@@ -636,12 +645,12 @@ def back_project_pcd(img, pcd_arr, color_arr, r_t, i):
             print "before filtering z: ", cam_coord_pcd.shape
             # cam_coord_pcd = cam_coord_pcd[np.where(cam_coord_pcd[:, 2] < 0)]
             # cam_coord_pcd = cam_coord_pcd[:20000, :]
-            print cam_coord_pcd
+            # print cam_coord_pcd
 
             inds = np.where(cam_coord_pcd[:, 2] > 0.2)
             cam_coord_pcd = cam_coord_pcd[inds]
             color_arr = color_arr[inds]
-            print cam_coord_pcd
+            # print cam_coord_pcd
             print "after filtering z: ", cam_coord_pcd.shape
 
             pcd_to_pix = (np.dot(intrinsic_paras, cam_coord_pcd.T)).T
@@ -649,13 +658,19 @@ def back_project_pcd(img, pcd_arr, color_arr, r_t, i):
             proj_pts = (pcd_to_pix / pcd_to_pix[:, 2].reshape(-1, 1))[:, :2].astype(np.int16)
 
             point_s = 3
-            print proj_pts
-
-            print proj_pts.shape
+            # print proj_pts
+            # 
+            # print proj_pts.shape
         else:
             raise Exception("Camera type not correctly defined!")
     else:
-        point_s = 1
+        if params["camera_type"] == "panoramic":
+            point_s = 5
+        elif params['camera_type'] == "perspective":
+            point_s = 3
+        else:
+            raise Exception("Camera type not correctly defined!")
+
         chessboard_result_file_path = "output/pcd_seg/" + str(i).zfill(4) + "_pcd_result.pkl"
         chessboard_result_file = cPickle.load(open(chessboard_result_file_path, "r"))
         rot1 = chessboard_result_file[0]
@@ -687,7 +702,6 @@ def back_project_pcd(img, pcd_arr, color_arr, r_t, i):
         print "after removal: ", proj_pts.shape
         color_arr = color_arr[inds]
 
-
     print
     print proj_pts.shape[0], proj_pts.min(axis=0), proj_pts.max(axis=0)
     print
@@ -697,7 +711,7 @@ def back_project_pcd(img, pcd_arr, color_arr, r_t, i):
     return img
 
 
-def vis_back_proj(ind=1, img_style="edge", pcd_style="intens"):
+def vis_back_proj(ind=1, img_style="edge", pcd_style="intens", hide_occlussion_by_marker=False):
     imgfile = "img/" + str(ind).zfill(params["file_name_digits"]) + "." + params['image_format']
     if img_style == "edge":
         gray = cv2.imread(imgfile)
@@ -706,7 +720,7 @@ def vis_back_proj(ind=1, img_style="edge", pcd_style="intens"):
     elif img_style == "orig":
         img = cv2.imread(imgfile)
     else:
-        print "Please input the right image style"
+        raise Exception("Please input the right image style")
 
     csvfile = "pcd/" + str(ind).zfill(params["file_name_digits"]) + ".csv"
 
@@ -716,11 +730,18 @@ def vis_back_proj(ind=1, img_style="edge", pcd_style="intens"):
     intens = csv[:, 3]
 
     filels = os.listdir(".")
+    cali_file_ls = []
     for file in filels:
         if file.find("cali_result.txt") > -1:
-            r_t = np.genfromtxt(file, delimiter=',')
-            print "Load ", file, " as the extrinsic calibration parameters!"
-            break
+            cali_file_ls.append(file)
+    if len(cali_file_ls) > 1:
+        warnings.warn("More than one calibration file exit! Load the latest file.", UserWarning)
+        latest_cali = find_latest(cali_file_ls)
+        r_t = np.genfromtxt(latest_cali, delimiter=',')
+        print "Load ", latest_cali, " as the extrinsic calibration parameters!"
+    elif len(cali_file_ls) == 1:
+        r_t = np.genfromtxt(cali_file_ls[0], delimiter=',')
+        print "Load ", cali_file_ls[0], " as the extrinsic calibration parameters!"
     else:
         raise Exception("No calibration file is found!")
 
@@ -731,26 +752,32 @@ def vis_back_proj(ind=1, img_style="edge", pcd_style="intens"):
     else:
         print "Please input the right pcd color style"
 
-    backproj_img = back_project_pcd(img, pcd, pcd_color, r_t, ind)
-    resized_img_for_view = cv2.resize(backproj_img, (int(W / 4.), int(H / 4.)))
+    backproj_img = back_project_pcd(img, pcd, pcd_color, r_t, ind, hide_occlussion_by_marker)
 
-    window_name = "ind: " + str(ind) + " img_style: " + img_style + " pcd_style: " + pcd_style
+    if max(backproj_img.shape[0], backproj_img.shape[1]) > 1000:
+        resize_factor = 1000. / max(backproj_img.shape[0], backproj_img.shape[1])
+        resized_img_for_view = cv2.resize(backproj_img, (0, 0), fx=resize_factor, fy=resize_factor)
+    else:
+        resized_img_for_view = backproj_img
+
+    window_name = "ind: " + str(ind) + " img_style: " + img_style + " pcd_style: " + pcd_style + (
+        " hide_occlusion " if hide_occlussion_by_marker else "")
     cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
     cv2.imshow(window_name, resized_img_for_view)
     k = cv2.waitKey(0)
     if k == 27:  # wait for ESC key to exit
         cv2.destroyAllWindows()
     elif k == ord('s'):  # wait for 's' key to save and exit
-        save_file_name = str(ind).zfill(params["file_name_digits"]) + "_" + img_style + "_" + pcd_style + "." + params[
-            'image_format']
+        save_file_name = str(ind).zfill(params["file_name_digits"]) + "_" + img_style + "_" + pcd_style + (
+            "_hide_occlusion" if hide_occlussion_by_marker else "") + "." + params['image_format']
         cv2.imwrite(save_file_name, img, [cv2.IMWRITE_JPEG_QUALITY, 70])
         print "The image is saved to ", save_file_name
         cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":
-    vis_back_proj(ind=1, img_style="orig", pcd_style="dis")
-    # vis_back_proj(ind=1, img_style="edge", pcd_style="dis")
+    # vis_back_proj(ind=1, img_style="orig", pcd_style="dis", hide_occlussion_by_marker=True)
+    vis_back_proj(ind=1, img_style="edge", pcd_style="intens", hide_occlussion_by_marker=False)
 
     # vis_all_markers(np.arange(1, 5).tolist())
     # vis_all_markers([1])

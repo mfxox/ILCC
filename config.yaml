@@ -1,9 +1,13 @@
 ###### Parameters for corner detection from images
-'image_format': 'jpg' #image format
-'image_res': (4000,8000) #image resolution
-'backend': 'matlab' #backend of detecting corners from the image, opencv 
+'image_res': (4000,8000) #image resolution for panoramic image only
+'backend': 'matlab' #backend of detecting corners from the image, "matlab" or "opencv"
 'output_img_with_dectected_corners': True #output the image with detected corners
 'back_proj_corners': True #back-project the detected corners of the point cloud to the images
+'camera_type': 'perspective' #camera model: 'panoramic' or 'perspective'
+'instrinsic_para': (166.87739756, 0., 311.29512622,  0., 334.91696616, 781.89612824,   0., 0., 1.)
+# intrinsic parameters are necessary for perspective cameras (1,2,3,4,5,6,7,8,9)→　[1,2,3
+#                                                                                   4,5,6
+#                                                                                   7,8,9]
 
 ###### Parameters for segmenting the point cloud
 'file_name_digits': 4 #filename format

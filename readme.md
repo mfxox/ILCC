@@ -17,8 +17,8 @@ These features are implemented for VLP-16, HDL-32e and HDL-64e. However, they te
 ##Updates
 * 2018-04-16 (Release of Version 0.2) 
     - Implement calibration for perspective camera.
-    - Add the sample data and results for perspective camera calibration.
-    - Add the feature hiding occluded parts by the chessboard when project the point cloud to the image.
+    - Add sample data and results for perspective camera calibration.
+    - Add a feature that can hide occluded parts by the chessboard when project the point cloud to the image.
     - Some other minor changes. 
 
 
@@ -115,22 +115,52 @@ python setup.py install
     from ILCC import LM_opt
     LM_opt.cal_ext_paras()
     ```
-    The extrinsic calibration results are output in the end of the process and saved with the filename *YYYYMMDD_HHMMSS_calir_result.txt*.  Images of back-projected 3D corners with the calculated parameters are saved to __DATA/output__ if 'back_proj_corners' is set to **True**, as shown below.
+    The extrinsic calibration results are output in the end of the process and saved with the filename *YYYYMMDD_HHMMSS_calir_result.txt*.  Images of back-projected 3D corners using the calculated parameters are saved to __DATA/output__ if 'back_proj_corners' is set to **True**, as shown below.
     <div style="text-align: center">
     <img src="readme_files/0001_cal_backproj.jpg" width = "50%" />
-    <img src="readme_files/0001_cal_backproj_zoom.jpg" width = "24.35%" />
+    <img src="readme_files/0001_cal_backproj_zoom.jpg" width = "24.35%" /><br>
+    <!-- <em>Example of panoramic image. </em> -->
     </div>
 1. After the aforementioned process, utility module can be imported for visualizing various of results. <br>
     ```python
     from ILCC import utility
-    utility.vis_back_proj(ind=1, img_style="edge", pcd_style="intens")
-    utility.vis_back_proj(ind=1, img_style="orig", pcd_style="dis")
+    utility.vis_back_proj(ind=1, img_style="orig", pcd_style="dis", hide_occlussion_by_marker=False)
+    utility.vis_back_proj(ind=1, img_style="orig", pcd_style="dis", hide_occlussion_by_marker=True)
+    utility.vis_back_proj(ind=1, img_style="edge", pcd_style="intens", hide_occlussion_by_marker=True)
     ```
      The image (see below) with backprojected point cloud with the calculated extrinsic parameters will be showed and press "s" for saving. __img_style__ can be "edge" (edge extracted) or "orig" (original image) and __pcd_style__ can be "dis" (color by distance) or "intens" (color by intensity).
     <div style="text-align: center">
-    <img src="readme_files/0001_edge_intens.jpg" width = "50%" />
-    <img src="readme_files/0001_orig_dis.jpg" width = "50%" />
+    <p align="center"> 
+    <img src="readme_files/0001_orig_dis.jpg" width = "100%" />
+    <em>Project points to the original image with coloring by distance.  The occluded part by the chessboard is not hided.</em>
+
+    <img src="readme_files/0001_orig_dis_hide_occlusion.jpg" width = "100%" />
+    <em>The occluded part by the chessboard is hided. The occluded part by the chessboard is hided by setting __hide_occlussion_by_marker__ *True*. </em>
+    <span style="color:red"> **Check the upper part of the chessboard in the image above.** </span>
+
+    <img src="readme_files/0001_edge_intens_hide_occlusion.jpg" width = "100%" />
+    <em>Project points to the edge image with coloring by intensity. Occluded points by the chessboard are hided.</span>
+    </p>
     </div>
+
+    <div style="text-align: center">
+    <p align="center"> 
+    <img src="readme_files/0001_orig_dis.png" width = "20%" />
+    <img src="readme_files/0001_orig_dis_hide_occlusion.png" width = "20%" />
+    <img src="readme_files/0001_edge_intens.png" width = "20%" />
+    <img src="readme_files/0001_edge_intens_hide_occlusion.png" width = "20%" /> <br>
+    <em>Results of perspective images. From left to right: [color: distance, original image], [color: distance, original image, hide occlusion], [color: intensity, edge image], [color: intensity, edge image, hide occlusion].  
+
+    </p>
+    </div>
+<!-- 
+    <div style="text-align: center">
+    <p align="center"> 
+    <img src="readme_files/0001_orig_dis_hide_occlusion.jpg" width = "49%" />
+    <img src="readme_files/0001_edge_intens_hide_occlusion.jpg" width = "49%" />
+    <em>Hide the occluded part by the chessboard by setting __hide_occlussion_by_marker__ True.</em>
+    </p>
+    </div> -->
     
 
 1. For 3D visualization, [VTK](https://github.com/Kitware/VTK) >=7.0 is necessary. See the example below for how to use.
@@ -209,7 +239,8 @@ Set __camera_type__ to 'perpsective' and input the intrinsic parameters to __ins
 </div>
 
 ## To do list
-1. uniformity check with chi-square test for chessboard detection
+<!-- 1. Uniformity check with chi-square test for chessboard detection -->
+1. Remove the limitation of the constraints of the consistency between the patterns size and board size.  Make corners detectable with OpenCV.  
 1. Integration for ROS
 1. <del>Add parameters for HDL-64 and VLP-16-PACK</del>(20170614)
 1. <del>Add optimization for perspective camera model</del>(20180416)
