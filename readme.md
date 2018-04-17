@@ -14,7 +14,7 @@ The main features of this implementations are:<br>
 These features are implemented for VLP-16, HDL-32e and HDL-64e. However, they tested only with HDL-32e. We are appreciated if one could provide data of other types for testing.
 
 
-##Updates
+## Updates
 * 2018-04-16 (Release of Version 0.2) 
     - Implement calibration for monocular camera.
     - Add sample data and results for perspective camera calibration.
@@ -140,7 +140,7 @@ python setup.py install
     <img src="readme_files/0001_orig_dis_hide_occlusion.jpg" width = "80%" /><br>
     <em>The occluded part by the chessboard is hided. The occluded part by the chessboard is hided by setting  the parameter hide_occlussion_by_marker True. <br>
     Check the upper part of the chessboard in the two images above.  <em>
-
+    <br>
     <img src="readme_files/0001_edge_intens_hide_occlusion.jpg" width = "80%" /><br>
     <em>Project points to the edge image with coloring by intensity. Occluded points by the chessboard are hided.</span>
     </p>
