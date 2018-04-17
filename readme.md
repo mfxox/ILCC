@@ -136,8 +136,8 @@ python setup.py install
     <br>
 
     <img src="readme_files/0001_orig_dis_hide_occlusion.jpg" width = "100%" />
-    <em>The occluded part by the chessboard is hided. The occluded part by the chessboard is hided by setting </em> __hide_occlussion_by_marker__ *True*. 
-    <br>![#f03c15](https://placehold.it/15/f03c15/000000?text=+) **Check the upper part of the chessboard in the two images above.** 
+    <em>The occluded part by the chessboard is hided. The occluded part by the chessboard is hided by setting  the parameter hide_occlussion_by_marker__ True. <br>
+    Check the upper part of the chessboard in the two images above.  <em>
 
     <img src="readme_files/0001_edge_intens_hide_occlusion.jpg" width = "100%" />
     <em>Project points to the edge image with coloring by intensity. Occluded points by the chessboard are hided.</span>
