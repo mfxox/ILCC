@@ -128,15 +128,16 @@ python setup.py install
     utility.vis_back_proj(ind=1, img_style="orig", pcd_style="dis", hide_occlussion_by_marker=True)
     utility.vis_back_proj(ind=1, img_style="edge", pcd_style="intens", hide_occlussion_by_marker=True)
     ```
-     The image (see below) with backprojected point cloud with the calculated extrinsic parameters will be showed and press "s" for saving. __img_style__ can be "edge" (edge extracted) or "orig" (original image) and __pcd_style__ can be "dis" (color by distance) or "intens" (color by intensity).
+     The image (see below) with back-projected point cloud with the calculated extrinsic parameters will be showed and press "s" for saving. __img_style__ can be "edge" (edge extracted) or "orig" (original image) and __pcd_style__ can be "dis" (color by distance) or "intens" (color by intensity).
     <div style="text-align: center">
     <p align="center"> 
     <img src="readme_files/0001_orig_dis.jpg" width = "100%" />
     <em>Project points to the original image with coloring by distance.  The occluded part by the chessboard is not hided.</em>
+    <br>
 
     <img src="readme_files/0001_orig_dis_hide_occlusion.jpg" width = "100%" />
-    <em>The occluded part by the chessboard is hided. The occluded part by the chessboard is hided by setting __hide_occlussion_by_marker__ *True*. </em>
-    <span style="color:red"> **Check the upper part of the chessboard in the image above.** </span>
+    <em>The occluded part by the chessboard is hided. The occluded part by the chessboard is hided by setting </em> __hide_occlussion_by_marker__ *True*. 
+    <br>![#f03c15](https://placehold.it/15/f03c15/000000?text=+) **Check the upper part of the chessboard in the two images above.** 
 
     <img src="readme_files/0001_edge_intens_hide_occlusion.jpg" width = "100%" />
     <em>Project points to the edge image with coloring by intensity. Occluded points by the chessboard are hided.</span>
@@ -242,6 +243,7 @@ Set __camera_type__ to 'perpsective' and input the intrinsic parameters to __ins
 <!-- 1. Uniformity check with chi-square test for chessboard detection -->
 1. Remove the limitation of the constraints of the consistency between the patterns size and board size.  Make corners detectable with OpenCV.  
 1. Integration for ROS
-1. <del>Add parameters for HDL-64 and VLP-16-PACK</del>(20170614)
 1. <del>Add optimization for perspective camera model</del>(20180416)
+1. <del>Add parameters for HDL-64 and VLP-16-PACK</del>(20170614)
+
 
