@@ -12,6 +12,7 @@ import os
 from ast import literal_eval as make_tuple
 from multiprocessing import Pool
 import re
+import warnings
 from scipy import stats
 
 import config
@@ -157,14 +158,29 @@ class jdc_segments_collection:
             # show_xyzrgb_points_vtk(tmp)
 
     def get_potential_segments(self):
+        laser_id_col_ind = 4
+        with open(self.__csv_path) as f:
+            first_line = f.readline()
+        header_itmes = first_line.split(",")
+        for i in xrange(len(header_itmes)):
+            if header_itmes[i].find("laser_id") > -1:
+                print "laser_id is found in ", i, "-th colunm!"
+                laser_id_col_ind = i
+                break
+        else:
+            warnings.warn(
+                "laser_id is not found in the hearder of the csv file. This may cause the point cloud failed to segment.",
+                UserWarning)
+
         raw_data = np.genfromtxt(self.__csv_path, delimiter=",", skip_header=1)
 
         self.__r_th = max(raw_data[:, 2])
         self.__g_th = min(raw_data[:, 2])
 
         l = self.l
+
         for m in xrange(l):
-            order = np.where(raw_data[:, 4] == m)  # the 4-th column means the laser id
+            order = np.where(raw_data[:, laser_id_col_ind] == m)  # the 4-th column means the laser id
             temp_data = raw_data[order[0]][:, :3]  # exact XYZ data with laser_id=i
             data_arr_by_id_list = temp_data
             total_points_num = data_arr_by_id_list.shape[0]
@@ -315,7 +331,7 @@ def calc_pca_correlation(a, b):
         for i in xrange(3):
             sim_b = sim_b + abs((pca_a.explained_variance_ratio_[i] + pca_b.explained_variance_ratio_[i]) / 2 * (
                 np.dot(pca_a.components_[i], pca_b.components_[i])) / (
-                                    norm(pca_a.components_[i]) * norm(pca_b.components_[i])))
+                                        norm(pca_a.components_[i]) * norm(pca_b.components_[i])))
         # print sim_b
         if sim_r < sim_r_th and sim_b > sim_b_th:
             return True
@@ -344,7 +360,7 @@ def calc_vectors_pca_correlation(a, b):
         for i in xrange(3):
             sim_b = sim_b + abs((pca_a.explained_variance_ratio_[i] + pca_b.explained_variance_ratio_[i]) / 2 * (
                 np.dot(pca_a.components_[i], pca_b.components_[i])) / (
-                                    np.linalg.norm(pca_a.components_[i]) * np.linalg.norm(pca_b.components_[i])))
+                                        np.linalg.norm(pca_a.components_[i]) * np.linalg.norm(pca_b.components_[i])))
         if sim_r < sim_r_th and sim_b > sim_b_th:
             return True
         else:
@@ -427,18 +443,26 @@ def is_marker(file_full_path, range_res, points_num_th=400):
     for jdc in jdcs_collection:
         tmp_list.extend(jdc)
     arr = np.array(tmp_list)
+    if debug:
+        show_pcd_ndarray(arr)
     if arr.shape[0] < points_num_th:
+        if debug:
+            print "points num: ", arr.shape[0]
         return False
 
     # use the distance between the marker's center and the lidar to filter
     avg = arr.mean(axis=0)
     if np.linalg.norm(avg) > range_res:
+        if debug:
+            print "avg: ", np.linalg.norm(avg)
         return False
 
     # check whether is a plane
     pca = PCA(n_components=3)
     pca.fit(arr)
     if pca.explained_variance_ratio_[2] > params['chessboard_detect_planar_PCA_ratio']:
+        if debug:
+            print "pca: ", pca.explained_variance_ratio_
         return False
 
     # map to 2D
@@ -449,9 +473,11 @@ def is_marker(file_full_path, range_res, points_num_th=400):
     points -= points.mean(axis=0)
 
     bbx = points.max(axis=0) - points.min(axis=0)
+    if debug:
+        print "bbx: ", bbx
 
     if (marker_th_l_min < bbx[0] < marker_th_l_max and marker_th_s_min < bbx[1] < marker_th_s_max) or (
-                        marker_th_s_min < bbx[0] < marker_th_s_max and marker_th_l_min < bbx[1] < marker_th_l_max):
+            marker_th_s_min < bbx[0] < marker_th_s_max and marker_th_l_min < bbx[1] < marker_th_l_max):
         # analyse the distribution of the points in four quadrants
         x_lin = [points.min(axis=0)[0], (points.min(axis=0)[0] + points.max(axis=0)[0]) / 2, points.max(axis=0)[0]]
         y_lin = [points.min(axis=0)[1], (points.min(axis=0)[1] + points.max(axis=0)[1]) / 2, points.max(axis=0)[1]]
@@ -463,7 +489,7 @@ def is_marker(file_full_path, range_res, points_num_th=400):
                 y_prd = [y_lin[j], y_lin[j + 1]]
                 num_in_quadrant_ls.append(np.count_nonzero(
                     (points[:, 0] >= x_prd[0]) & (points[:, 0] <= x_prd[1]) & (points[:, 1] >= y_prd[0]) & (
-                        points[:, 1] <= y_prd[1])))
+                            points[:, 1] <= y_prd[1])))
         normed = np.array(num_in_quadrant_ls, dtype=np.float32) / sum(num_in_quadrant_ls)
 
         if normed.max() - normed.min() < 0.15:
