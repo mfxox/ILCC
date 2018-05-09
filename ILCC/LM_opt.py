@@ -75,7 +75,7 @@ def xyz2angle(pcd):
 def convert2_ang_cm(ls):
     ret = []
     for i in xrange(3):
-        ret.append(np.rad2deg(ls[i] % 3.14))
+        ret.append(np.rad2deg(ls[i]))
     for i in xrange(3):
         ret.append(ls[3 + i] * 100)
     return ret
@@ -325,8 +325,10 @@ def opt_r_t(corners_in_img_arr, corners_in_pcd_arr, initial_guess=np.zeros(6).to
     return res
 
 
-def cal_ext_paras():
-    ls = (np.arange(1, 5)).tolist()
+def cal_ext_paras(ind_ls = (np.arange(1, 21)).tolist()):
+    #ind_ls: Indexes of pairs used for optimization
+	
+	ls=ind_ls
     # res_ls = []
     # pnp_ls = []
 
