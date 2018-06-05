@@ -17,6 +17,7 @@ These features are implemented for VLP-16, HDL-32e and HDL-64e. However, they te
 
 
 ## Updates
+* 2018-06-05 Add instruction for installing dependencies on Ubuntu.
 * 2018-04-16 (Release of Version 0.2) 
     - Implement calibration for monocular camera.
     - Add sample data and results for perspective camera calibration.
@@ -24,16 +25,21 @@ These features are implemented for VLP-16, HDL-32e and HDL-64e. However, they te
     - Some other minor changes. 
 
 
-## Dependencies
+## Dependencies (Tested on macOS sierra and Ubuntu 14.04/16.04)
 * Python >= 2.7.9
-* [OpenCV](http://opencv.org/)
+* [OpenCV](http://opencv.org/) (Remember to [enable python shared library](https://github.com/pyenv/pyenv/wiki) if you are using python installed by  pyenv)
     - for macOS:<br> 
     ```sh
     brew install opencv3
     echo /usr/local/opt/opencv3/lib/python2.7/site-packages >> /usr/local/lib/python2.7/site-packages/opencv3.pth
     ```
+    - for Ubuntu:<br> 
+    ```sh
+    git clone https://github.com/opencv/opencv.git
+    cd opencv && mkdir build && cd build && make -j4 && make install
+    ```
 * [OpenGV](https://laurentkneip.github.io/opengv/page_installation.html)
-    - for macOS:<br> 
+    - for macOS and Ubuntu:<br> 
     ```sh
     git clone https://github.com/mfxox/opengv
     cd opengv
@@ -44,15 +50,20 @@ These features are implemented for VLP-16, HDL-32e and HDL-64e. However, they te
     ```sh
     brew install pcl
     ```
+    - for Ubuntu:<br> 
+    ```sh
+    sudo apt-get install libpcl-1.7-all
+    ```
+    or [build from source](http://www.pointclouds.org/documentation/tutorials/compiling_pcl_posix.php)
 * [PCL python bindings](<https://github.com/mfxox/python-pcl>)
-    - for macOS:<br> 
+    - for macOS and Ubuntu:<br> 
     ```sh
     git clone https://github.com/mfxox/python-pcl
     cd python-pcl
     python setup.py install
     ```
 * [MATLAB engine for Python](https://www.mathworks.com/help/matlab/matlab_external/install-the-matlab-engine-for-python.html): 
-    - for macOS or Linux:<br> 
+    - for macOS and Linux:<br> 
     ```sh
     cd "matlabroot/extern/engines/python"
     python setup.py install
