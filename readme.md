@@ -14,6 +14,7 @@ The main features of this implementations are:<br>
 1. optimization for extrinsic calibration parameters
 1. various of visualization for 3D point clouds with VTK python wrapper<br>
 These features are implemented for VLP-16, HDL-32e and HDL-64e. However, they tested only with HDL-32e. We are appreciated if one could provide data of other types for testing.
+<img src="readme_files/VLP16_omni60.gif" />
 
 
 ## Updates
