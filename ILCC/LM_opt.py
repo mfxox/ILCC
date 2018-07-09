@@ -63,12 +63,9 @@ def voxel2pixel(ls):
 
 
 def xyz2angle(pcd):
-    inclination = np.arcsin(pcd[2] / np.linalg.norm(pcd))  # 2017/03/12 为什么是cos？不是sin吗
-    # print np.rad2deg(inclination)
-    # azimuth = -np.arctan2(pcd[1], pcd[0]) + np.pi / 2
-    azimuth = np.arctan2(pcd[1], pcd[0])  # 2017/04/02　p1
-    # if azimuth < 0:
-    #     azimuth += np.pi
+    inclination = np.arcsin(pcd[2] / np.linalg.norm(pcd))
+    azimuth = np.arctan2(pcd[1], pcd[0])  
+
     return [inclination, azimuth]
 
 
@@ -109,11 +106,7 @@ def calc_inintial_guess(corners_in_img_arr, corners_in_pcd_arr, method="UPNP"):
 
     img_bearing_vectors = np.array(img_bearing_vectors)
     pcd_bearing_vectors = np.array(corners_in_pcd_arr) / np.linalg.norm(corners_in_pcd_arr, axis=1).reshape(-1, 1)
-    #
-    # ransac_transformation = pyopengv.relative_pose_ransac(img_bearing_vectors, pcd_bearing_vectors, "NISTER", 0.01,
-    #                                                       1000)
-    # # ransac_transformation = pyopengv.relative_pose_fivept_kneip(img_bearing_vectors, pcd_bearing_vectors)
-
+ 
     if method == "RANSAC":
         transformation = pyopengv.absolute_pose_ransac(img_bearing_vectors, pcd_bearing_vectors, "UPNP", 0.001, 100000)
     elif method == "EPNP":
@@ -130,13 +123,7 @@ def calc_inintial_guess(corners_in_img_arr, corners_in_pcd_arr, method="UPNP"):
     angs = rotationMatrixToEulerAngles(transformation[:3, :3].T).tolist()
     ret = []
     ret.extend(angs)
-    # scale = least_squares(cal_scale_cost, x0=np.random.random(),
-    #                       args=(img_bearing_vectors, pcd_bearing_vectors, corners_in_pcd_arr, ransac_transformation),
-    #                       method="lm", ftol=1e-10, max_nfev=20000)
-    # print scale
-    # print "estimated scale: ", scale.x
-    # print scale.x * ransac_transformation[:3, 3]
-    # ret.extend((scale.x * ransac_transformation[:3, 3]).tolist())
+
     ret.extend((-transformation[:3, 3]).tolist())
     return np.array(ret)
 
@@ -179,10 +166,6 @@ def back_project(r_t, img, corners_in_img_arr, corners_in_pcd_arr):
 
     transformed_pcd = roate_with_rt(r_t, corners_in_pcd_arr)
 
-    # rot_mat = np.dot(transforms3d.axangles.axangle2mat([0, 0, 1], 0),
-    #                  np.dot(transforms3d.axangles.axangle2mat([0, 1, 0], r_t[1]),
-    #                         transforms3d.axangles.axangle2mat([1, 0, 0], r_t[0])))
-    # transformed_pcd = np.dot(rot_mat, corners_in_pcd_arr.T).T + np.array([0, 0, r_t[2]])
 
     transformed_pcd_ls = transformed_pcd.tolist()
     if params["camera_type"] == "panoramic":
@@ -196,12 +179,10 @@ def back_project(r_t, img, corners_in_img_arr, corners_in_pcd_arr):
         raise Exception("Camera_type define error!")
     # print proj_corners
 
-    # cv2.polylines(img, [np.fliplr(proj_corners)], 0, (0, 255, 255), 1, lineType=16)
+
     cv2.polylines(img, [proj_corners], 0, (0, 255, 255), 1, lineType=16)
     for i in xrange(proj_corners.shape[0]):
-        # cv2.circle(img, (proj_corners[i][1], proj_corners[i][0]), s2[i], tuple(c2[i].tolist()), 1)
-        # cv2.putText(img, str(i + 1), (proj_corners[i][1], proj_corners[i][0]), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
-        #             1)
+             1)
         cv2.circle(img, (proj_corners[i][0], proj_corners[i][1]), s2[i], tuple(c2[i].tolist()), 1)
         cv2.putText(img, str(i + 1), (proj_corners[i][0], proj_corners[i][1]), cv2.FONT_HERSHEY_SIMPLEX, .3,
                     (255, 165, 0),0)
@@ -216,7 +197,7 @@ def pixel2angle(pix):
     return [inclination, azimuth]
 
 
-def roate_with_rt(r_t, arr):  # zhengchang [ang_x ang_y ang_z x y z]# r_t=np.array([ang_z,t_z,ang_x_ang_y,t_x,_t_y])
+def roate_with_rt(r_t, arr):  
     rot_mat = np.dot(transforms3d.axangles.axangle2mat([0, 0, 1], r_t[2]),
                      np.dot(transforms3d.axangles.axangle2mat([0, 1, 0], r_t[1]),
                             transforms3d.axangles.axangle2mat([1, 0, 0], r_t[0])))
@@ -226,7 +207,7 @@ def roate_with_rt(r_t, arr):  # zhengchang [ang_x ang_y ang_z x y z]# r_t=np.arr
 
 
 def cost_func(r_t, corners_in_pcd_arr,
-              corners_in_img_arr):  # r_t:theta_x,theta_y,theta_z,t_x,t_y,t_z    corners_in_pcd_arr:n*2  corners_in_img_arr:n*2
+              corners_in_img_arr):  
 
     transformed_pcd = roate_with_rt(r_t, corners_in_pcd_arr)
 
@@ -248,19 +229,10 @@ def cost_func(r_t, corners_in_pcd_arr,
 
     elif params['camera_type'] == "perspective":
         cam_coord_pcd = transformed_pcd.copy()
-        # coordinate axis swap from world/velodyne coordinate? x→z y→-x z→y
-        # cam_coord_pcd[:, 0] = transformed_pcd[:, 2]
-        # cam_coord_pcd[:, 1] = -transformed_pcd[:, 0]
-        # cam_coord_pcd[:, 2] = transformed_pcd[:, 1]
 
-        # pcd_to_pix = (np.dot(intrinsic_paras, transformed_pcd.T)).T
         pcd_to_pix = (np.dot(intrinsic_paras, cam_coord_pcd.T)).T
         pcd_to_pix = pcd_to_pix / pcd_to_pix[:, 2].reshape(-1, 1)
 
-        # pcd_to_pix = (
-        #     cv2.projectPoints(corners_in_pcd_arr, np.zeros(3), np.zeros(3), intrinsic_paras, np.zeros(4))[0]).reshape(
-        #     -1, 2)
-        # print pcd_to_pix
         num = corners_in_pcd_arr.shape[0]
         ls = []
         for i in range(0, num):
@@ -293,10 +265,6 @@ def cost_func_min(r_t, corners_in_pcd_arr,
 def run_min(args, initial_guess):  # (np.random.random(6)).tolist()
     print
     res = least_squares(cost_func, initial_guess, args=args, method="lm", ftol=1e-15, max_nfev=100000)  # 1e-10
-
-    # with bounds limitation
-    # res = least_squares(cost_func, initial_guess, args=args, method="trf", ftol=1e-15, max_nfev=1000000,
-    #                     bounds=([-np.pi, -np.pi, -np.pi, -2, -2, -2], [np.pi, np.pi, np.pi, 2, 2, 2]))  # 1e-10
     return res
 
 
