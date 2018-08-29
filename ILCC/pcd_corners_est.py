@@ -44,6 +44,10 @@ elif params['LiDAR_type'] == 'hdl64':
 elif params['LiDAR_type'] == 'vlp16_puck':
     h_coef = 2 * np.sin(np.deg2rad(0.25) / 2)
     v_coef = 2 * np.sin(np.deg2rad(2) / 2.)
+elif params['LiDAR_type'] == 'hdl32c':
+    h_coef = 2 * np.sin(np.deg2rad(0.25) / 2)
+    v_coef = 2 * np.sin(np.deg2rad(0.333) / 2.)#non-linear [4.667, -4.   , -3.667, -3.333, -3.   , -2.667, -2.333, -2.   ,-1.333,  0.667,  1.   ,  1.667,  2.333,  3.333,  4.667,  7. , 10.333, 15.]
+    #delte_ang= [0.667,   0.333,   0.334,   0.333,   0.333,   0.334, 0.333,   0.667,   2.   ,   0.333,   0.667,   0.666,   1.   ,1.334,   2.333,   3.333,   4.6673]
 else:
     AssertionError("Please input the right LiDAR_type in the config.yaml")
 
