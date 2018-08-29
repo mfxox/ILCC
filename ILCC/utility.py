@@ -75,29 +75,29 @@ def draw_one_grd_vtk(ls):  # arr:[a,b,c,d],a:orig, b, point1, c,point 2, d,color
 # intens: color by reflectance intensity (white:high back:low), autumn: matplotlib autumn color map,  cool: matplotlib cool color map
 def gen_color_tup_for_vis(color_style="intens_rg", xyzi_arr=None):
     assert xyzi_arr is not None, "The array of the point cloud must be not None"
-    a = xyzi_arr[:, 3].min()
-    b = xyzi_arr[:, 3].max()
+    a = xyzi_arr[:, params['intensity_col_ind']].min()
+    b = xyzi_arr[:, params['intensity_col_ind']].max()
     color_ls = []
     if color_style == "intens_rg":
-        tmp = (xyzi_arr[:, 3] - a) / (b - a) * 255
+        tmp = (xyzi_arr[:, params['intensity_col_ind']] - a) / (b - a) * 255
         for k in xrange(xyzi_arr.shape[0]):
-            rgb_tuple = np.array([tmp[k], 0, 255 - xyzi_arr[k, 3]]).astype(np.int32)
+            rgb_tuple = np.array([tmp[k], 0, 255 - xyzi_arr[k, params['intensity_col_ind']]]).astype(np.int32)
             color_ls.append(rgb_tuple)
         return color_ls
     elif color_style == "intens":
-        tmp = (xyzi_arr[:, 3] - a) / (b - a) * 255
+        tmp = (xyzi_arr[:, params['intensity_col_ind']] - a) / (b - a) * 255
         for k in xrange(xyzi_arr.shape[0]):
             rgb_tuple = np.repeat(tmp[k], 3).astype(np.int32)
             color_ls.append(rgb_tuple)
         return color_ls
     elif color_style == "autumn":
-        tmp = (xyzi_arr[:, 3] - a).astype(np.float32) / (b - a)
+        tmp = (xyzi_arr[:, params['intensity_col_ind']] - a).astype(np.float32) / (b - a)
         for k in xrange(xyzi_arr.shape[0]):
             rgb_tuple = (np.array(plt.cm.autumn(1 - tmp[k]))[:3] * 255).astype(np.int32)
             color_ls.append(rgb_tuple)
         return color_ls
     elif color_style == "cool":
-        tmp = (xyzi_arr[:, 3] - a).astype(np.float32) / (b - a)
+        tmp = (xyzi_arr[:, params['intensity_col_ind']] - a).astype(np.float32) / (b - a)
         for k in xrange(xyzi_arr.shape[0]):
             rgb_tuple = (np.array(plt.cm.cool(tmp[k]))[:3] * 255).astype(np.int32)
             color_ls.append(rgb_tuple)
@@ -325,7 +325,9 @@ def remove_occlusion_of_chessboard(pcd_arr, corners_in_pcd_arr):
 
 # visualize csv file of i-th point cloud
 def vis_csv_pcd(ind=1, color_style="monochrome"):
-    pcd_arr = np.genfromtxt("pcd/" + str(ind).zfill(4) + ".csv", delimiter=",", skip_header=1)
+    pcd_arr = np.genfromtxt(
+        os.path.join(params['base_dir'], "pcd/" + str(ind).zfill(params["file_name_digits"])) + ".csv", delimiter=",",
+        skip_header=1)
     # actor = vis_3D_points(pcd_arr, color_style="intens")
     actor = vis_3D_points(pcd_arr, color_style=color_style)
     renderer = vtk.vtkRenderer()
@@ -335,7 +337,7 @@ def vis_csv_pcd(ind=1, color_style="monochrome"):
 
 def vis_segments(ind=1):
     renderer = vtk.vtkRenderer()
-    seg_folder = "output/pcd_seg/" + str(ind).zfill(4) + "/"
+    seg_folder = os.path.join(params['base_dir'], "output/pcd_seg/" + str(ind).zfill(params["file_name_digits"])) + "/"
     seg_list = os.listdir(seg_folder)
     for seg in seg_list:
         if seg.split(".")[-1] == "txt":
@@ -353,10 +355,12 @@ def vis_segments(ind=1):
 
 def vis_segments_only_chessboard_color(ind=1):
     renderer = vtk.vtkRenderer()
-    seg_folder = "output/pcd_seg/" + str(ind).zfill(4) + "/"
+    seg_folder = os.path.join(params['base_dir'], "output/pcd_seg/" + str(ind).zfill(params["file_name_digits"])) + "/"
     seg_list = os.listdir(seg_folder)
     chessboard_file_name = \
-        cPickle.load(open("output/pcd_seg/" + str(ind).zfill(4) + "_pcd_result.pkl", "r"))[-1].split("/")[-1]
+        cPickle.load(open(os.path.join(params['base_dir'], "output/pcd_seg/") + str(ind).zfill(
+            params["file_name_digits"]) + "_pcd_result.pkl", "r"))[
+            -1].split("/")[-1]
     for seg in seg_list:
         if seg.split(".")[-1] == "txt":
             if seg == chessboard_file_name:
@@ -392,31 +396,38 @@ def vis_all_markers(ls=[1]):
     ren.SetBackground(.5, .6, .7)
 
     for i in ls:
-        pcd_result_file = "output/pcd_seg/" + str(i).zfill(4) + "_pcd_result.pkl"
-        csv_path = "pcd/" + str(i).zfill(4) + ".csv"
+        try:
+            pcd_result_file = os.path.join(params['base_dir'],
+                                           "output/pcd_seg/" + str(i).zfill(
+                                               params["file_name_digits"]) + "_pcd_result.pkl")
+            csv_path = os.path.join(params['base_dir'], "pcd/" + str(i).zfill(params["file_name_digits"]) + ".csv")
 
-        with open(os.path.abspath(pcd_result_file), "r") as f:
-            pcd_result_ls = cPickle.load(f)
-        assert pcd_result_ls is not None
+            with open(os.path.abspath(pcd_result_file), "r") as f:
+                pcd_result_ls = cPickle.load(f)
+            assert pcd_result_ls is not None
 
-        marker_full_data_arr = exact_full_marker_data(csv_path, [pcd_result_ls[-1]])
+            marker_full_data_arr = exact_full_marker_data(csv_path, [pcd_result_ls[-1]])
 
-        marker_arr = marker_full_data_arr[:, :3]
-        # transformed_pcd = roate_with_rt(np.array(r_t), marker_arr)
-        if i % 4 == 0:
-            actor2 = vis_3D_points(
-                np.hstack([marker_arr + np.array([0, 0, 0]), marker_full_data_arr[:, 3:]]), color_style="intens")
-        elif i % 4 == 1:
-            actor2 = vis_3D_points(
-                np.hstack([marker_arr + np.array([0, 0, 0]), marker_full_data_arr[:, 3:]]), color_style="autumn")
-        elif i % 4 == 2:
-            actor2 = vis_3D_points(
-                np.hstack([marker_arr + np.array([0, 0, 0]), marker_full_data_arr[:, 3:]]), color_style="cool")
-        else:
-            actor2 = vis_3D_points(
-                np.hstack([marker_arr + np.array([0, 0, 0]), marker_full_data_arr[:, 3:]]),
-                color_style="intens_rg")
-        ren.AddActor(actor2)
+            marker_arr = marker_full_data_arr[:, :3]
+            # transformed_pcd = roate_with_rt(np.array(r_t), marker_arr)
+            if i % 4 == 0:
+                actor2 = vis_3D_points(
+                    np.hstack([marker_arr + np.array([0, 0, 0]), marker_full_data_arr[:, 3:]]), color_style="intens")
+            elif i % 4 == 1:
+                actor2 = vis_3D_points(
+                    np.hstack([marker_arr + np.array([0, 0, 0]), marker_full_data_arr[:, 3:]]), color_style="autumn")
+            elif i % 4 == 2:
+                actor2 = vis_3D_points(
+                    np.hstack([marker_arr + np.array([0, 0, 0]), marker_full_data_arr[:, 3:]]), color_style="cool")
+            else:
+                actor2 = vis_3D_points(
+                    np.hstack([marker_arr + np.array([0, 0, 0]), marker_full_data_arr[:, 3:]]),
+                    color_style="intens_rg")
+            ren.AddActor(actor2)
+        except:
+            print i, "-th pcd corners are not found!"
+            continue
+
     transform2 = vtk.vtkTransform()
     transform2.Translate(0.0, 0.0, 0.0)
     axes2 = vtk.vtkAxesActor()
@@ -501,8 +512,9 @@ def transform_grid(args):
 
 def vis_ested_pcd_corners(ind=1):
     # pair_ind = 9
-    pcd_result_file = "output/pcd_seg/" + str(ind).zfill(4) + "_pcd_result.pkl"
-    csv_file = "pcd/" + str(ind).zfill(4) + ".csv"
+    pcd_result_file = os.path.join(params['base_dir'],
+                                   "output/pcd_seg/" + str(ind).zfill(params["file_name_digits"]) + "_pcd_result.pkl")
+    csv_file = os.path.join(params['base_dir'], "pcd/" + str(ind).zfill(params["file_name_digits"]) + ".csv")
 
     full_arr = np.genfromtxt(csv_file, delimiter=",", skip_header=1)
 
@@ -549,7 +561,7 @@ def vis_ested_pcd_corners(ind=1):
     ren.AddActor(axes2)
     renWin = vtk.vtkRenderWindow()
     renWin.AddRenderer(ren)
-    renWin.SetWindowName(str(i).zfill(4))
+    renWin.SetWindowName(str(i).zfill(params["file_name_digits"]))
     iren = vtk.vtkRenderWindowInteractor()
     iren.SetRenderWindow(renWin)
 
@@ -575,7 +587,7 @@ def vis_ested_pcd_corners(ind=1):
 
     iren.Initialize()
     renWin.Render()
-    renWin.SetWindowName(str(ind).zfill(4))
+    renWin.SetWindowName(str(ind).zfill(params["file_name_digits"]))
 
     iren.Start()
 
@@ -654,7 +666,11 @@ def back_project_pcd(img, pcd_arr, color_arr, r_t, i, hide_occlussion_by_marker)
             print "after filtering z: ", cam_coord_pcd.shape
 
             pcd_to_pix = (np.dot(intrinsic_paras, cam_coord_pcd.T)).T
-            pcd_to_pix = pcd_to_pix[np.where(pcd_to_pix[:, 2] > 0)]
+            # pcd_to_pix = pcd_to_pix[np.where(pcd_to_pix[:, 2] > 0)]
+
+            inds = np.where(pcd_to_pix[:, 2] > 0)
+            pcd_to_pix = pcd_to_pix[inds]
+            color_arr = color_arr[inds]
             proj_pts = (pcd_to_pix / pcd_to_pix[:, 2].reshape(-1, 1))[:, :2].astype(np.int16)
 
             point_s = 3
@@ -671,7 +687,8 @@ def back_project_pcd(img, pcd_arr, color_arr, r_t, i, hide_occlussion_by_marker)
         else:
             raise Exception("Camera type not correctly defined!")
 
-        chessboard_result_file_path = "output/pcd_seg/" + str(i).zfill(4) + "_pcd_result.pkl"
+        chessboard_result_file_path = os.path.join(params['base_dir'], "output/pcd_seg/" + str(i).zfill(
+            params["file_name_digits"]) + "_pcd_result.pkl")
         chessboard_result_file = cPickle.load(open(chessboard_result_file_path, "r"))
         rot1 = chessboard_result_file[0]
         t1 = chessboard_result_file[1].reshape(1, 3)
@@ -711,8 +728,10 @@ def back_project_pcd(img, pcd_arr, color_arr, r_t, i, hide_occlussion_by_marker)
     return img
 
 
-def vis_back_proj(ind=1, img_style="edge", pcd_style="intens", hide_occlussion_by_marker=False):
-    imgfile = "img/" + str(ind).zfill(params["file_name_digits"]) + "." + params['image_format']
+def vis_back_proj(ind=1, img_style="edge", pcd_style="intens", hide_occlussion_by_marker=False,
+                  save_without_show=False):
+    imgfile = os.path.join(params['base_dir'],
+                           "img/" + str(ind).zfill(params["file_name_digits"]) + "." + params['image_format'])
     if img_style == "edge":
         gray = cv2.imread(imgfile)
         edges = cv2.Canny(gray, 50, 150, apertureSize=3)
@@ -722,14 +741,14 @@ def vis_back_proj(ind=1, img_style="edge", pcd_style="intens", hide_occlussion_b
     else:
         raise Exception("Please input the right image style")
 
-    csvfile = "pcd/" + str(ind).zfill(params["file_name_digits"]) + ".csv"
+    csvfile = os.path.join(params['base_dir'], "pcd/" + str(ind).zfill(params["file_name_digits"]) + ".csv")
 
     csv = np.genfromtxt(csvfile, delimiter=",", skip_header=1)
     pcd = csv[:, :3]
     dis_arr = np.linalg.norm(pcd, axis=1)
-    intens = csv[:, 3]
+    intens = csv[:, params['intensity_col_ind']]
 
-    filels = os.listdir(".")
+    filels = os.listdir(params['base_dir'])
     cali_file_ls = []
     for file in filels:
         if file.find("cali_result.txt") > -1:
@@ -737,10 +756,10 @@ def vis_back_proj(ind=1, img_style="edge", pcd_style="intens", hide_occlussion_b
     if len(cali_file_ls) > 1:
         warnings.warn("More than one calibration file exit! Load the latest file.", UserWarning)
         latest_cali = find_latest(cali_file_ls)
-        r_t = np.genfromtxt(latest_cali, delimiter=',')
+        r_t = np.genfromtxt(os.path.join(params['base_dir'], latest_cali), delimiter=',')
         print "Load ", latest_cali, " as the extrinsic calibration parameters!"
     elif len(cali_file_ls) == 1:
-        r_t = np.genfromtxt(cali_file_ls[0], delimiter=',')
+        r_t = np.genfromtxt(os.path.join(params['base_dir'], cali_file_ls[0]), delimiter=',')
         print "Load ", cali_file_ls[0], " as the extrinsic calibration parameters!"
     else:
         raise Exception("No calibration file is found!")
@@ -760,16 +779,26 @@ def vis_back_proj(ind=1, img_style="edge", pcd_style="intens", hide_occlussion_b
     else:
         resized_img_for_view = backproj_img
 
-    window_name = "ind: " + str(ind) + " img_style: " + img_style + " pcd_style: " + pcd_style + (
-        " hide_occlusion " if hide_occlussion_by_marker else "")
-    cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
-    cv2.imshow(window_name, resized_img_for_view)
-    k = cv2.waitKey(0)
-    if k == 27:  # wait for ESC key to exit
-        cv2.destroyAllWindows()
-    elif k == ord('s'):  # wait for 's' key to save and exit
-        save_file_name = str(ind).zfill(params["file_name_digits"]) + "_" + img_style + "_" + pcd_style + (
-            "_hide_occlusion" if hide_occlussion_by_marker else "") + "." + params['image_format']
+    if save_without_show:
+        window_name = "ind: " + str(ind) + " img_style: " + img_style + " pcd_style: " + pcd_style + (
+            " hide_occlusion " if hide_occlussion_by_marker else "")
+        cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
+        cv2.imshow(window_name, resized_img_for_view)
+        k = cv2.waitKey(0)
+        if k == 27:  # wait for ESC key to exit
+            cv2.destroyAllWindows()
+        elif k == ord('s'):  # wait for 's' key to save and exit
+            save_file_name = os.path.join(params['base_dir'],
+                                          str(ind).zfill(
+                                              params["file_name_digits"])) + "_" + img_style + "_" + pcd_style + (
+                                 "_hide_occlusion" if hide_occlussion_by_marker else "") + "." + params['image_format']
+            cv2.imwrite(save_file_name, img, [cv2.IMWRITE_JPEG_QUALITY, 70])
+            print "The image is saved to ", save_file_name
+            cv2.destroyAllWindows()
+    else:
+        save_file_name = os.path.join(params['base_dir'], str(ind).zfill(
+            params["file_name_digits"])) + "_" + img_style + "_" + pcd_style + (
+                             "_hide_occlusion" if hide_occlussion_by_marker else "") + "." + params['image_format']
         cv2.imwrite(save_file_name, img, [cv2.IMWRITE_JPEG_QUALITY, 70])
         print "The image is saved to ", save_file_name
         cv2.destroyAllWindows()

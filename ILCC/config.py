@@ -16,12 +16,12 @@ def default_params():
     '''
     default_params_yaml = open("config.yaml", "r")
     params = yaml.load(default_params_yaml)
-    params['image_format'] = get_img_format()
+    params['image_format'] = get_img_format(params['base_dir'])
     return params
 
 
-def get_img_format():
-    file_ls = os.listdir("img")
+def get_img_format(base_dir):
+    file_ls = os.listdir(os.path.join(base_dir, "img"))
     for file in file_ls:
         ext = file.split(".")[-1]
         if ext in ["png", "jpg"]:

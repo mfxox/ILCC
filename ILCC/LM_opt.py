@@ -182,7 +182,6 @@ def back_project(r_t, img, corners_in_img_arr, corners_in_pcd_arr):
 
     cv2.polylines(img, [proj_corners], 0, (0, 255, 255), 1, lineType=16)
     for i in xrange(proj_corners.shape[0]):
-             1)
         cv2.circle(img, (proj_corners[i][0], proj_corners[i][1]), s2[i], tuple(c2[i].tolist()), 1)
         cv2.putText(img, str(i + 1), (proj_corners[i][0], proj_corners[i][1]), cv2.FONT_HERSHEY_SIMPLEX, .3,
                     (255, 165, 0),0)
@@ -306,8 +305,8 @@ def cal_ext_paras(ind_ls = (np.arange(1, 21)).tolist()):
     if params['camera_type'] == "panoramic":
         print "Optimize the extrinsic parameters with panoramic model."
         for i in ls:
-            imgfile = "img/" + str(i).zfill(4) + "." + params['image_format']
-            cords_file = "output/img_corners/" + str(i).zfill(4) + "_img_corners.txt"
+            imgfile = "img/" + str(i).zfill(params['file_name_digits']) + "." + params['image_format']
+            cords_file = "output/img_corners/" + str(i).zfill(params['file_name_digits']) + "_img_corners.txt"
             corners_in_img_arr = np.genfromtxt(cords_file, delimiter=",").astype(np.int32)
             # make sure the corners are counted start from left lower
             if np.linalg.norm(np.array(corners_in_img_arr[0]) - np.array([0, H])) > np.linalg.norm(
@@ -315,7 +314,7 @@ def cal_ext_paras(ind_ls = (np.arange(1, 21)).tolist()):
                 print imgfile + " is counted in reversed order"
                 corners_in_img_arr = np.flipud(corners_in_img_arr)
 
-            pcd_result_file = "output/pcd_seg/" + str(i).zfill(4) + "_pcd_result.pkl"
+            pcd_result_file = "output/pcd_seg/" + str(i).zfill(params['file_name_digits']) + "_pcd_result.pkl"
             # print imgfile
             with open(os.path.abspath(pcd_result_file), "r") as f:
                 pcd_result_ls = cPickle.load(f)
@@ -367,15 +366,17 @@ def cal_ext_paras(ind_ls = (np.arange(1, 21)).tolist()):
         if params['back_proj_corners']:
             # for i in range(start, end):
             for i in ls:
-                imgfile = "img/" + str(i).zfill(4) + "." + params['image_format']
-                cords_file = "output/img_corners/" + str(i).zfill(4) + "_img_corners.txt"
+                imgfile = os.path.join(params['base_dir'], "img/") + str(i).zfill(params['file_name_digits']) + "." + \
+                          params['image_format']
+                cords_file = os.path.join(params['base_dir'], "output/img_corners/") + str(i).zfill(
+                    params['file_name_digits']) + "_img_corners.txt"
                 corners_in_img_arr = np.genfromtxt(cords_file, delimiter=",").astype(np.int32)
                 # make sure the corners are counted start from left lower
                 if np.linalg.norm(np.array(corners_in_img_arr[0]) - np.array([0, H])) > np.linalg.norm(
                         np.array(corners_in_img_arr[-1]) - np.array([0, H])):
                     corners_in_img_arr = np.flipud(corners_in_img_arr)
 
-                pcd_result_file = "output/pcd_seg/" + str(i).zfill(4) + "_pcd_result.pkl"
+                pcd_result_file = "output/pcd_seg/" + str(i).zfill(params['file_name_digits']) + "_pcd_result.pkl"
                 # print imgfile
                 with open(os.path.abspath(pcd_result_file), "r") as f:
                     pcd_result_ls = cPickle.load(f)
@@ -391,13 +392,16 @@ def cal_ext_paras(ind_ls = (np.arange(1, 21)).tolist()):
                 t2 = pcd_result_ls[3].reshape(1, 3)
                 corners_in_pcd_arr = np.dot(np.dot(rot2.T, corner_arr.T).T - t2 + t1, rot1)
                 ret = back_project(res.x, cv2.imread(imgfile), corners_in_img_arr, corners_in_pcd_arr)
-                save_file = "output/" + str(i).zfill(4) + "_cal_backproj." + params['image_format']
+                save_file = "output/" + str(i).zfill(params['file_name_digits']) + "_cal_backproj." + params[
+                    'image_format']
                 cv2.imwrite(save_file, ret)
     elif params['camera_type'] == "perspective":
         print "Optimize the extrinsic parameters with perspective model."
         for i in ls:
-            imgfile = "img/" + str(i).zfill(4) + "." + params['image_format']
-            cords_file = "output/img_corners/" + str(i).zfill(4) + "_img_corners.txt"
+            imgfile = os.path.join(params['base_dir'], "img/") + str(i).zfill(params['file_name_digits']) + "." + \
+                      params['image_format']
+            cords_file = os.path.join(params['base_dir'], "output/img_corners/") + str(i).zfill(
+                params['file_name_digits']) + "_img_corners.txt"
             corners_in_img_arr = np.genfromtxt(cords_file, delimiter=",").astype(np.int32)
             # make sure the corners are counted start from left lower
             if np.linalg.norm(np.array(corners_in_img_arr[0]) - np.array([0, H])) > np.linalg.norm(
@@ -405,7 +409,8 @@ def cal_ext_paras(ind_ls = (np.arange(1, 21)).tolist()):
                 print imgfile + " is counted in reversed order"
                 corners_in_img_arr = np.flipud(corners_in_img_arr)
 
-            pcd_result_file = "output/pcd_seg/" + str(i).zfill(4) + "_pcd_result.pkl"
+            pcd_result_file = os.path.join(params['base_dir'], "output/pcd_seg/") + str(i).zfill(
+                params['file_name_digits']) + "_pcd_result.pkl"
             # print imgfile
             with open(os.path.abspath(pcd_result_file), "r") as f:
                 pcd_result_ls = cPickle.load(f)
@@ -444,7 +449,7 @@ def cal_ext_paras(ind_ls = (np.arange(1, 21)).tolist()):
         print "initial guess by UPnP:", initial_guess
         print
         print "final extrinsic parameters:"
-        cal_file_name = time.strftime("%Y%m%d_%H%M%S_cali_result.txt")
+        cal_file_name = os.path.join(params['base_dir'], time.strftime("%Y%m%d_%H%M%S_cali_result.txt"))
         np.savetxt(cal_file_name, res.x, delimiter=',')
         print "refined by LM : ", res.x, " unit: [rad,rad,rad,m,m,m]. The result is Saved to ", cal_file_name
         print "unit converted : ", convert2_ang_cm(res.x), "unit: [deg,deg,deg,cm,cm,cm]"
@@ -459,15 +464,18 @@ def cal_ext_paras(ind_ls = (np.arange(1, 21)).tolist()):
         if params['back_proj_corners']:
             # for i in range(start, end):
             for i in ls:
-                imgfile = "img/" + str(i).zfill(4) + "." + params['image_format']
-                cords_file = "output/img_corners/" + str(i).zfill(4) + "_img_corners.txt"
+                imgfile = os.path.join(params['base_dir'], "img/") + str(i).zfill(params['file_name_digits']) + "." + \
+                          params['image_format']
+                cords_file = os.path.join(params['base_dir'], "output/img_corners/") + str(i).zfill(
+                    params['file_name_digits']) + "_img_corners.txt"
                 corners_in_img_arr = np.genfromtxt(cords_file, delimiter=",").astype(np.int32)
                 # make sure the corners are counted start from left lower
                 if np.linalg.norm(np.array(corners_in_img_arr[0]) - np.array([0, H])) > np.linalg.norm(
                         np.array(corners_in_img_arr[-1]) - np.array([0, H])):
                     corners_in_img_arr = np.flipud(corners_in_img_arr)
 
-                pcd_result_file = "output/pcd_seg/" + str(i).zfill(4) + "_pcd_result.pkl"
+                pcd_result_file = os.path.join(params['base_dir'], "output/pcd_seg/") + str(i).zfill(
+                    params['file_name_digits']) + "_pcd_result.pkl"
                 # print imgfile
                 with open(os.path.abspath(pcd_result_file), "r") as f:
                     pcd_result_ls = cPickle.load(f)
@@ -484,7 +492,9 @@ def cal_ext_paras(ind_ls = (np.arange(1, 21)).tolist()):
                 corners_in_pcd_arr = np.dot(np.dot(rot2.T, corner_arr.T).T - t2 + t1, rot1)
                 ret = back_project(res.x, cv2.imread(imgfile), corners_in_img_arr, corners_in_pcd_arr)
                 # ret = back_project(initial_guess, cv2.imread(imgfile), corners_in_img_arr, corners_in_pcd_arr)
-                save_file = "output/" + str(i).zfill(4) + "_cal_backproj." + params['image_format']
+                save_file = os.path.join(params['base_dir'], "output/") + str(i).zfill(
+                    params['file_name_digits']) + "_cal_backproj." + params[
+                                'image_format']
                 cv2.imwrite(save_file, ret)
 
     else:

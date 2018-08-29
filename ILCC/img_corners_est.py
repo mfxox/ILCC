@@ -35,8 +35,9 @@ def get_corner_coords(imagefilename, backend=params['backend'], size=make_tuple(
             size = tuple((np.array(boardSize).astype(np.int32) - 1).flatten())
             cv2.drawChessboardCorners(img, size, np_imagePoints.astype(np.float32), 1)
             if save_figure:
-                save_imagefilename = "output/img_corners/" + (imagefilename.split("/")[-1]).split(".")[
-                    0] + "_detected_corners" + "." + params['image_format']
+                save_imagefilename = os.path.join(params['base_dir'], "output")+"/img_corners/" + \
+                                     (imagefilename.split("/")[-1]).split(".")[
+                                         0] + "_detected_corners" + "." + params['image_format']
                 cv2.imwrite(save_imagefilename, img)
                 print "Image with detected_corners is saved in " + save_imagefilename
             if show_figure:
@@ -82,16 +83,20 @@ def get_corner_coords(imagefilename, backend=params['backend'], size=make_tuple(
 def detect_img_corners():
     ls = np.arange(1, 21).tolist()
     # ls = [20]
-    if os.path.isdir("output/img_corners"):
-        shutil.rmtree("output/img_corners")
-    os.makedirs("output/img_corners")
+    img_corner_path = os.path.join(base_dir, "output/img_corners/")
+    if os.path.isdir(img_corner_path):
+        shutil.rmtree(img_corner_path)
+    os.makedirs(img_corner_path)
     for i in ls:
         try:
-            imagefilename = "img/" + str(i).zfill(4) + "." + params['image_format']
+            imagefilename = os.path.join(base_dir,
+                                         "img", str(i).zfill(params['file_name_digits']) + "." + params['image_format'])
+            print imagefilename
             corner_points = get_corner_coords(imagefilename)
 
             # print corner_points
-            save_points_filename = "output/img_corners/" + str(i).zfill(4) + "_img_corners" + ".txt"
+            save_points_filename = img_corner_path + str(i).zfill(
+                params['file_name_digits']) + "_img_corners" + ".txt"
             np.savetxt(save_points_filename, corner_points, delimiter=",")
         except:
             continue

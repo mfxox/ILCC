@@ -433,7 +433,7 @@ if debug:
 
 
 # determine whether a segment is the potential chessboard's point cloud
-def is_marker(file_full_path, range_res, points_num_th=400):
+def is_marker(file_full_path, range_res, points_num_th=250):
     # result = False
     jdcs_collection = cPickle.load(open(file_full_path, 'rb'))
 
@@ -650,7 +650,7 @@ def cost_func_for_opt_mini(theta_t, transed_pcd, marker_full_data_arr, gray_zone
     cost = 0
     for row in arr:
         if polygon_path.contains_point(row[:2]):
-            if gray_zone[0] < row[3] < gray_zone[1]:
+            if gray_zone[0] < row[params['intensity_col_ind']] < gray_zone[1]:
                 y.append(0.5)
                 continue
             else:
@@ -667,7 +667,7 @@ def cost_func_for_opt_mini(theta_t, transed_pcd, marker_full_data_arr, gray_zone
                     else:
                         color = 0
 
-                estimated_color = (np.sign(row[3] - gray_zone[1]) + 1) / 2
+                estimated_color = (np.sign(row[params['intensity_col_ind']] - gray_zone[1]) + 1) / 2
                 if estimated_color != color:
                     cost += (min(abs(row[0] - x_grid_arr)) + min(abs(row[1] - y_grid_arr)))
                 y.append(color)
@@ -812,7 +812,7 @@ def opt_min(param_ls, initial_guess=np.zeros(3).tolist()):
 
 
 # utilize the defined functions to get the chessboard's corners for single frame point cloud
-def run(csv_path, save_folder_path="output/pcd_seg/", size=marker_size):
+def run(csv_path, save_folder_path=os.path.join(params['base_dir'], "output/pcd_seg/"), size=marker_size):
     if not_segmented:
         seg_pcd(csv_path, save_folder_path)
     parts = csv_path.split("/")
@@ -841,7 +841,7 @@ def run(csv_path, save_folder_path="output/pcd_seg/", size=marker_size):
 
     # calculate the rotate angle in xoy palne around the z axis
     if 1:
-        low_intes, high_intens = get_gray_thre(marker_full_data_arr_fitted[:, 3])
+        low_intes, high_intens = get_gray_thre(marker_full_data_arr_fitted[:, params['intensity_col_ind']])
         print "low_intes,high_intes:", low_intes, high_intens
         rate = 2
         gray_zone = np.array([((rate - 1) * low_intes + high_intens), (low_intes + (rate - 1) * high_intens)]) / rate
@@ -878,12 +878,13 @@ def run(csv_path, save_folder_path="output/pcd_seg/", size=marker_size):
 
 # for multiple  processing
 def main_for_pool(i):
-    pcd_file = "pcd/" + str(i).zfill(params["file_name_digits"]) + ".csv"
+    pcd_file = os.path.join(params['base_dir'], "pcd/") + str(i).zfill(params["file_name_digits"]) + ".csv"
     print pcd_file
     try:
         result = run(csv_path=pcd_file)
         print result
-        save_file_path = "output/pcd_seg/" + str(i).zfill(params["file_name_digits"]) + "_pcd_result.pkl"
+        save_file_path = os.path.join(params['base_dir'], "output/pcd_seg/") + str(i).zfill(
+            params["file_name_digits"]) + "_pcd_result.pkl"
         with open(os.path.abspath(save_file_path), 'w') as file:
             file.truncate()
             cPickle.dump(result, file)
@@ -897,7 +898,7 @@ def main_for_pool(i):
 
 # main function for detecting corners from pcd files in the folder
 def detect_pcd_corners():
-    file_ls = os.listdir("pcd")
+    file_ls = os.listdir(os.path.join(params['base_dir'], "pcd"))
     pcd_ls = []
     for file in file_ls:
         if file.find("csv") > -1:

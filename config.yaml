@@ -1,3 +1,5 @@
+###### File path related
+'base_dir': "minivan/cam4" #The path of directory including img,pcd,out folders.
 ###### Parameters for corner detection from images
 'image_res': (4000,8000) #image resolution for panoramic image only
 'backend': 'matlab' #backend of detecting corners from the image, "matlab" or "opencv"
@@ -25,7 +27,7 @@
 
 ######## Parameters for 3D corner detection from detected chessboard point cloud segment
 'start_pattern_corner': 0 #The color of the pattern in the left down of the chessboard and 0 for black  1 for white
-
+'intensity_col_ind': 6 # The index of intensity column (counting starts from 0)
 
 ######### Settings for multi-processing
 'multi_proc': True #Use multiple processing
