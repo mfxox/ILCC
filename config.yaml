@@ -1,5 +1,5 @@
 ###### File path related
-'base_dir': "minivan/cam4" #The path of directory including img,pcd,out folders.
+'base_dir': "" #The path of directory including img,pcd,out folders.
 ###### Parameters for corner detection from images
 'image_res': (4000,8000) #image resolution for panoramic image only
 'backend': 'matlab' #backend of detecting corners from the image, "matlab" or "opencv"
