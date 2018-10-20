@@ -37,7 +37,7 @@ These features are implemented for VLP-16, HDL-32e and HDL-64e. However, they te
     - for Ubuntu:<br> 
     ```sh
     git clone https://github.com/opencv/opencv.git
-    cd opencv && mkdir build && cd build && make -j4 && make install
+    cd opencv && mkdir build && cd build && cmake .. && make -j4 && make install
     ```
 * [OpenGV](https://laurentkneip.github.io/opengv/page_installation.html)
     - for macOS and Ubuntu:<br> 
