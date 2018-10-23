@@ -24,7 +24,7 @@ def get_img_format(base_dir):
     file_ls = os.listdir(os.path.join(base_dir, "img"))
     for file in file_ls:
         ext = file.split(".")[-1]
-        if ext in ["png", "jpg"]:
+        if ext in ["png", "PNG", "jpg", "JPG"]:
             return ext
 
 # print default_params()
