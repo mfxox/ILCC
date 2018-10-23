@@ -32,3 +32,4 @@
 ######### Settings for multi-processing
 'multi_proc': True #Use multiple processing
 'proc_num': 4 #The number of cores to use for multiple procesisng
+'num_poses': 20 #The number of images and laserscans 
