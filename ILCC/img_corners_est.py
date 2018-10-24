@@ -53,11 +53,15 @@ def get_corner_coords(imagefilename, backend=params['backend'], size=make_tuple(
     elif backend == "opencv":
         print "OpenCV " + str(cv2.__version__) + " is used as backend for detecting corners"
         img = cv2.imread(imagefilename)
+        size=(size[0]-1,size[1]-1)
         print img.shape
 
         ret, corners = cv2.findChessboardCorners(img, size,
                                                  flags=cv2.CALIB_CB_ADAPTIVE_THRESH + cv2.CALIB_CB_NORMALIZE_IMAGE + cv2.CALIB_CB_FAST_CHECK)
         #flags=cv2.cv.CV_CALIB_CB_ADAPTIVE_THRESH + cv2.cv.CV_CALIB_CB_NORMALIZE_IMAGE + cv2.CALIB_CB_FAST_CHECK
+        corners_reshaped=corners.reshape((size[1],size[0],2))
+        corners_reshaped=np.flip(corners_reshaped,1)
+        corners=corners_reshaped.reshape((size[0]*size[1],1,2))
         if not ret:
             print "Corners can not be detected!"
             return None
@@ -81,15 +85,15 @@ def get_corner_coords(imagefilename, backend=params['backend'], size=make_tuple(
 
 #
 def detect_img_corners():
-    ls = np.arange(1, 21).tolist()
+    ls = np.arange(1,params['num_poses']+1).tolist()
     # ls = [20]
-    img_corner_path = os.path.join(base_dir, "output/img_corners/")
+    img_corner_path = os.path.join(params['base_dir'], "output/img_corners/")
     if os.path.isdir(img_corner_path):
         shutil.rmtree(img_corner_path)
     os.makedirs(img_corner_path)
     for i in ls:
         try:
-            imagefilename = os.path.join(base_dir,
+            imagefilename = os.path.join(params['base_dir'],
                                          "img", str(i).zfill(params['file_name_digits']) + "." + params['image_format'])
             print imagefilename
             corner_points = get_corner_coords(imagefilename)
@@ -97,7 +101,7 @@ def detect_img_corners():
             # print corner_points
             save_points_filename = img_corner_path + str(i).zfill(
                 params['file_name_digits']) + "_img_corners" + ".txt"
-            np.savetxt(save_points_filename, corner_points, delimiter=",")
+            np.savetxt(save_points_filename, np.squeeze(corner_points), delimiter=",")
         except:
             continue
 
