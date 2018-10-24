@@ -83,13 +83,13 @@ def get_corner_coords(imagefilename, backend=params['backend'], size=make_tuple(
 def detect_img_corners():
     ls = np.arange(1, 21).tolist()
     # ls = [20]
-    img_corner_path = os.path.join(base_dir, "output/img_corners/")
+    img_corner_path = os.path.join(params['base_dir'], "output/img_corners/")
     if os.path.isdir(img_corner_path):
         shutil.rmtree(img_corner_path)
     os.makedirs(img_corner_path)
     for i in ls:
         try:
-            imagefilename = os.path.join(base_dir,
+            imagefilename = os.path.join(params['base_dir'],
                                          "img", str(i).zfill(params['file_name_digits']) + "." + params['image_format'])
             print imagefilename
             corner_points = get_corner_coords(imagefilename)
