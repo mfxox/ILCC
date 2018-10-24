@@ -292,7 +292,7 @@ def opt_r_t(corners_in_img_arr, corners_in_pcd_arr, initial_guess=np.zeros(6).to
     return res
 
 
-def cal_ext_paras(ind_ls = (np.arange(1, params['num_poses']+1)).tolist()):
+def cal_ext_paras(ind_ls = (np.arange(1, params['poses_num']+1)).tolist()):
     #ind_ls: Indexes of pairs used for optimization
 	
     ls = ind_ls

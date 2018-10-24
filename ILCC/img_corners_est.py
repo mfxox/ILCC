@@ -85,7 +85,7 @@ def get_corner_coords(imagefilename, backend=params['backend'], size=make_tuple(
 
 #
 def detect_img_corners():
-    ls = np.arange(1,params['num_poses']+1).tolist()
+    ls = np.arange(1,params['poses_num']+1).tolist()
     # ls = [20]
     img_corner_path = os.path.join(params['base_dir'], "output/img_corners/")
     if os.path.isdir(img_corner_path):
