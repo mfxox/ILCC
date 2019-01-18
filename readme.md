@@ -15,17 +15,8 @@ If you find our codes and method useful to your work, please consider citing thi
     NUMBER = {8},
     ARTICLE-NUMBER = {851},
     ISSN = {2072-4292},
-    DOI = {10.3390/rs9080851},
+    DOI = {10.3390/rs9080851}
     }
-    @misc{WANG_ILCC,
-      author = {Wang, Weimin and Sakurada, Ken and Kawaguchi, Nobuo},
-      title = {ILCC},
-      year = {2017},
-      publisher = {GitHub},
-      journal = {GitHub repository},
-      howpublished = {\url{https://github.com/mfxox/ILCC}},
-    }
-
 
 ## Introduction
 
