@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE) 
 
 ## Citation
-If you find our code or method useful in your work, please consider citing this work:
+If you find our codes and method useful to your work, please consider citing this work:
 
     @Article{WANG2017Lidar_camera_cali,
     AUTHOR = {Wang, Weimin and Sakurada, Ken and Kawaguchi, Nobuo},
