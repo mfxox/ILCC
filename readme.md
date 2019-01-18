@@ -15,7 +15,7 @@ If you find our code or method useful in your work, please consider citing this 
     NUMBER = {8},
     ARTICLE-NUMBER = {851},
     ISSN = {2072-4292},
-    DOI = {10.3390/rs9080851}
+    DOI = {10.3390/rs9080851},
     }
     @misc{WANG_ILCC,
       author = {Wang, Weimin and Sakurada, Ken and Kawaguchi, Nobuo},
