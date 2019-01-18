@@ -2,6 +2,30 @@
 <!-- based on reflectance intensity of the laser -->
 
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE) 
+
+## Citation
+If you find our code or method useful in your work, please consider citing this work:
+@Article{WANG2017Lidar_camera_cali,
+AUTHOR = {Wang, Weimin and Sakurada, Ken and Kawaguchi, Nobuo},
+TITLE = {Reflectance Intensity Assisted Automatic and Accurate Extrinsic Calibration of 3D LiDAR and Panoramic Camera Using a Printed Chessboard},
+JOURNAL = {Remote Sensing},
+VOLUME = {9},
+YEAR = {2017},
+NUMBER = {8},
+ARTICLE-NUMBER = {851},
+ISSN = {2072-4292},
+DOI = {10.3390/rs9080851}
+}
+@misc{WANG_ILCC,
+  author = {Wang, Weimin and Sakurada, Ken and Kawaguchi, Nobuo},
+  title = {ILCC},
+  year = {2017},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/mfxox/ILCC}},
+}
+
+
 ## Introduction
 
 <!-- [[paper]](http://www.mdpi.com/journal/remotesensing)-->
