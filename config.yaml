@@ -27,7 +27,7 @@
 
 ######## Parameters for 3D corner detection from detected chessboard point cloud segment
 'start_pattern_corner': 0 #The color of the pattern in the left down of the chessboard and 0 for black  1 for white
-'intensity_col_ind': 6 # The index of intensity column (counting starts from 0)
+'intensity_col_ind': 3 # The index of intensity column (counting starts from 0). !!! Wrong number will cause the failure of corner detection in pcd files.
 
 ######### Settings for multi-processing
 'multi_proc': True #Use multiple processing

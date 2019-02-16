@@ -281,6 +281,9 @@ Set __camera_type__ to 'perpsective' and input the intrinsic parameters to __ins
 * Try to increase the value of *chessboard_detect_planar_PCA_ratio* in ```config.yaml``` if the point cloud of the chessboard is very noisy in the normal vector direction.
 * Try to decrease the value of *least_marker_points_num* in ```config.yaml``` if the chessboard is very far.
 
+3. The corner of the chessboard point cloud is not correctly detected.
+* Check the value of *intensity_col_in* in ```config.yaml``` is same with index of intensity's column in csv files, if you have similar visualized result in Issue [#10](https://github.com/mfxox/ILCC/issues/10).
+
 For further questions, please discuss in [Issues](https://github.com/mfxox/ILCC/issues).
 
 

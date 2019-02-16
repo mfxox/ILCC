@@ -192,6 +192,8 @@ class jdc_segments_collection:
             stop_point_pos = 0
             first_found = False
             first_jdc = -1
+            least_points_num = 0
+
             for i in xrange(total_points_num):
                 #                 print i
                 a = data_arr_by_id_list[i, :]
@@ -212,7 +214,6 @@ class jdc_segments_collection:
                     jdc_seg.update_centroid()
 
                     jdc_seg.points_rgb = np.random.randint(0, 255, size=3)
-                    least_points_num = 0
 
                     if len(jdc_seg.points_xyz) > least_points_num:
                         if not first_found:
