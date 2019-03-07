@@ -15,7 +15,11 @@ def default_params():
     '''Return default configuration
     '''
     default_params_yaml = open("config.yaml", "r")
-    params = yaml.load(default_params_yaml)
+    if(yaml.__version__[0]>=5):
+        params = yaml.safe_load(default_params_yaml)
+    else:
+        params = yaml.load(default_params_yaml)
+
     params['image_format'] = get_img_format(params['base_dir'])
     return params
 
