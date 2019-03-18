@@ -105,7 +105,7 @@ These features are implemented for VLP-16, HDL-32e and HDL-64e. However, they te
 ## Usage
 ### Installation
 ```sh
-git clone https://github.com/mfxox/ILCC
+git clone --recurse-submodules https://github.com/mfxox/ILCC
 cd ILCC
 python setup.py install
 ```
@@ -193,7 +193,7 @@ python setup.py install
     </p>
     </div> -->
 
-1. For 3D visualization, [VTK](https://github.com/Kitware/VTK) >=7.0 is necessary. See the example below for how to use.
+1. For 3D visualization, [VTK](https:// clhub.com/Kitware/VTK) >=7.0 is necessary. See the example below for how to use.
 
 
 ## Example
