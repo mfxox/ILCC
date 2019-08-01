@@ -644,7 +644,7 @@ def back_project_pcd(img, pcd_arr, color_arr, r_t, i, hide_occlussion_by_marker)
 
     if not hide_occlussion_by_marker:  # whether remove occlussions by the chessboard
         if params["camera_type"] == "panoramic":
-            pcd2angle_s = map(xyz2angle, transformed_pcd_ls)
+            pcd2angle_s = map(xyz2angle, transformed_pcd)
             proj_pts = np.array(map(voxel2pixel, pcd2angle_s))
             point_s = 5
         elif params['camera_type'] == "perspective":
