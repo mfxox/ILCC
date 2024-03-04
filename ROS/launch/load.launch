@@ -1,0 +1,5 @@
+<launch>
+    <node name="load_node" pkg="ilcc-ros" type="load" output="screen">
+    </node>
+</launch>
+

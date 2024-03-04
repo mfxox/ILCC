@@ -1,0 +1,15 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import os
+os.chdir("/home/kinetic/catkin_ws/src/my_pkg")
+
+from ILCC import img_corners_est
+img_corners_est.detect_img_corners()
+
+from ILCC import pcd_corners_est
+pcd_corners_est.detect_pcd_corners()
+
+from ILCC import LM_opt
+LM_opt.cal_ext_paras()
+
+
