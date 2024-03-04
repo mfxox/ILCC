@@ -1,0 +1,138 @@
+#! /usr/bin/env python
+
+import numpy as np
+import sys
+import os
+import rospy
+import cPickle
+#import _pickle as cPickle
+#import utility
+from ILCC import utility
+import std_msgs.msg
+import sensor_msgs.point_cloud2 as pc2
+from sensor_msgs.msg import PointCloud2, PointField
+from visualization_msgs.msg import Marker
+from visualization_msgs.msg import MarkerArray
+from geometry_msgs.msg import Quaternion, Pose, Point, Vector3
+from std_msgs.msg import Header, ColorRGBA
+
+rospy.init_node("pc2_publisher")
+
+def publish_pc2(pc, topic= '/points_raw'):#, repeat = 5): #sys.maxint
+    """Publisher of PointCloud data"""
+    pub = rospy.Publisher(topic, PointCloud2, queue_size=100)
+    header = std_msgs.msg.Header()
+    header.stamp = rospy.Time.now()
+    header.frame_id = "map"
+    fields = [PointField('x', 0, PointField.FLOAT32, 1),
+              PointField('y', 4, PointField.FLOAT32, 1),
+              PointField('z', 8, PointField.FLOAT32, 1),
+              PointField('intensity', 12, PointField.FLOAT32, 1)]
+    points = pc2.create_cloud(header, fields, pc[:, :4])
+    print("Publishing pointcloud2")
+
+    r = rospy.Rate(0.1)
+    while not rospy.is_shutdown():
+        pub.publish(points)
+        r.sleep()
+        #repeat -= 1
+        #if repeat <= 0:
+            #break
+
+
+# visualize csv file of i-th point cloud
+def vis_csv_pcd(ind=1, color_style="monochrome"):
+    pcd_path = rospy.get_param('pcd_path')
+    pcd_arr = np.genfromtxt(pcd_path + str(ind).zfill(4) + ".csv", delimiter=",", skip_header=1)
+    publish_pc2(pcd_arr)#, repeat=2)
+
+
+def vis_segments(ind=1):
+    seg_folder = "output/pcd_seg/" + str(ind).zfill(4) + "/"
+    seg_list = os.listdir(seg_folder)
+    all_pc = np.zeros(shape=(0,4))
+    for seg in seg_list:
+        if seg.split(".")[-1] == "txt":
+            color_intensity = np.random.randint(1, 255 *100, 1)
+            points_ls = list()
+            jdcs_collection = cPickle.load(open(os.path.abspath(seg_folder + seg), 'rb'))
+            if len(jdcs_collection) > 0:  # filter
+                for jdc in jdcs_collection:
+                    points_ls.extend(jdc)
+            inten_col = np.zeros(shape=(len(points_ls)))
+            inten_col[:] = color_intensity
+            jdcs_pc = np.insert(np.array(points_ls), 3, values=inten_col, axis=1)
+            all_pc = np.vstack((all_pc, jdcs_pc))
+
+    publish_pc2(all_pc, '/points_segs')
+
+
+def pub_marker_array(marker_arr, topic="/visualization_marker_array"):#, repeat = 5):
+    publisher = rospy.Publisher(topic, MarkerArray, queue_size=100)
+    markerArray = MarkerArray()
+    for marker in marker_arr:
+        markerArray.markers.append(marker)
+
+    r = rospy.Rate(1)
+    while not rospy.is_shutdown():
+        publisher.publish(markerArray)
+        r.sleep()
+        #repeat -= 1
+        #if repeat <= 0:
+            #break
+
+
+
+def vis_pcd_corners(ind = 1):
+    pcd_result_file = "output/pcd_seg/" + str(ind).zfill(4) + "_pcd_result.pkl"
+    csv_file = "pcd/" + str(ind).zfill(4) + ".csv"
+
+    with open(os.path.abspath(pcd_result_file), "rb") as f:
+        pcd_result_ls = cPickle.load(f)
+    assert pcd_result_ls is not None
+    rot1 = pcd_result_ls[0]
+    t1 = pcd_result_ls[1].reshape(1, 3)
+    rot2 = pcd_result_ls[2]
+    t2 = pcd_result_ls[3].reshape(1, 3)
+    corner_arr = pcd_result_ls[4].reshape(-1, 2)
+
+    num = corner_arr.shape[0]
+    corner_arr = np.hstack([corner_arr, np.zeros(num).reshape(num, 1)])
+    corners_in_pcd_arr = np.dot(np.dot(rot2.T, corner_arr.T).T - t2 + t1, rot1)
+    
+
+    i = 0
+    marker_arr = []
+    for corner in corners_in_pcd_arr:
+        i += 1
+        marker = Marker(
+            type=Marker.TEXT_VIEW_FACING,
+            id=i,
+            lifetime=rospy.Duration(0.0),
+            pose=Pose(Point(corner[0], corner[1], corner[2] ), Quaternion(0, 0, 0, 1)),
+            scale=Vector3(0.03, 0.03, 0.03),
+            header=Header(frame_id='map'),
+            color=ColorRGBA(0.0, 1.0, 0.0, 0.8),
+            text=str(i))
+        marker_arr.append(marker)
+    return marker_arr, csv_file, pcd_result_ls
+    #pub_marker_array(marker_arr)#, repeat=2)
+    
+    #marker_full_data_arr = utility.exact_full_marker_data(csv_file, [pcd_result_ls[-1]])
+    #publish_pc2(marker_full_data_arr, '/points_segs')#marker_full_data_arr
+
+def marker(marker_arr):
+    pub_marker_array(marker_arr)#, repeat=2)
+
+def pkl(csv_file,pcd_result_ls):
+    marker_full_data_arr = utility.exact_full_marker_data(csv_file, [pcd_result_ls[-1]])
+    publish_pc2(marker_full_data_arr, '/points_segs')#marker_full_data_arr
+
+if __name__ == "__main__":
+    ind = 3
+    vis_csv_pcd(ind)
+    #vis_segments(ind)
+    #result = vis_pcd_corners(ind)
+    #marker(result[0])
+    #pkl(result[1], result[2])
+    rospy.spin()

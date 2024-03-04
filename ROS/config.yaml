@@ -1,0 +1,35 @@
+###### File path related
+'base_dir': "" #The path of directory including img,pcd,out folders.
+###### Parameters for corner detection from images
+'image_res': (4000,8000) #image resolution for panoramic image only
+'backend': 'matlab' #backend of detecting corners from the image, "matlab" or "opencv"
+'output_img_with_dectected_corners': True #output the image with detected corners
+'back_proj_corners': True #back-project the detected corners of the point cloud to the images
+'camera_type': 'perspective' #camera model: 'panoramic' or 'perspective'
+'instrinsic_para': (166.87739756, 0., 311.29512622,  0., 334.91696616, 781.89612824,   0., 0., 1.)
+# intrinsic parameters are necessary for perspective cameras (1,2,3,4,5,6,7,8,9)→　[1,2,3
+#                                                                                   4,5,6
+#                                                                                   7,8,9]
+
+###### Parameters for segmenting the point cloud
+'file_name_digits': 4 #filename format
+'LiDAR_type': 'hdl32' # available choices 'vlp16_puck', 'hdl32', 'hdl64'
+'laser_beams_num': 32 #The number of the laser beams of the Velodyne LiDAR
+'jdc_thre_ratio': 5 #The ratio of adaptive threshold for clustering scanline
+'agglomerative_cluster_th_ratio': 5 #The ratio of adaptive threshold for combining the scanline cluters
+
+
+######### Parameters for detecting chessboard from segmentation result
+'pattern_size': (6,8)  #number of vertical and horizontal patterns
+'grid_length': 0.075 #the length of one grid of the pattern [m]
+'chessboard_detect_planar_PCA_ratio': 0.01 # The threshold of the planarity check of the potential chessboard with PCA
+'marker_range_limit': 5 #The farthest range of the chessboard for filtering irrelative segments. Segments whose centroid to Velodyne farther that this threshold will not be considered as a potential chessboard.
+
+######## Parameters for 3D corner detection from detected chessboard point cloud segment
+'start_pattern_corner': 0 #The color of the pattern in the left down of the chessboard and 0 for black  1 for white
+'intensity_col_ind': 3 # The index of intensity column (counting starts from 0). !!! Wrong number will cause the failure of corner detection in pcd files.
+
+######### Settings for multi-processing
+'multi_proc': True #Use multiple processing
+'proc_num': 4 #The number of cores to use for multiple processing
+'poses_num': 20 #The number of image-laserscan pairs 
