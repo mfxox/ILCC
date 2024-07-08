@@ -1,0 +1,5 @@
+<launch>
+        <param name="pcd_path" type="str" value="$(find ilcc-ros)/pcd/" />
+	<node name="rz" pkg="ilcc-ros" type="rviz" output="screen" />
+        <node name="rviz" pkg="rviz" type="rviz" />
+</launch>

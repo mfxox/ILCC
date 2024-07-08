@@ -1,0 +1,6 @@
+<launch>
+	<param name="config_file" type="str" value="$(find ilcc-ros)/config.yaml" />
+	<param name="img_file" type="str" value="$(find ilcc-ros)/img" />
+        <node name="registration_node" pkg="ilcc-ros" type="registration" output="screen" />
+</launch>
+

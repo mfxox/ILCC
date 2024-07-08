@@ -1,0 +1,118 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import rospy
+from sensor_msgs.msg import PointCloud2, Image
+from cv_bridge import CvBridge
+import cv2
+import sensor_msgs.point_cloud2 as pc2
+import csv
+import os
+import termios
+import sys
+import tty
+
+rospy.init_node('bag_reader', anonymous=True)
+
+os.chdir("/home/kinetic/catkin_ws/src/my_pkg")
+
+image_data_folder = 'data/img'
+pointcloud_data_folder = 'data/pcd'
+
+if not os.path.exists(image_data_folder):
+    os.makedirs(image_data_folder)
+
+if not os.path.exists(pointcloud_data_folder):
+    os.makedirs(pointcloud_data_folder)
+
+bridge = CvBridge()
+
+image_counter = 1
+pointcloud_counter = 1
+
+timestamp_counter = rospy.Time(0)
+
+image_data_buffer = []
+pointcloud_data_buffer = []
+
+received_messages_count = 0
+generated_files_count = 0
+
+def pointcloud_callback(msg):
+    global timestamp_counter, pointcloud_data_buffer, received_messages_count
+
+    msg.header.stamp.secs = timestamp_counter.secs
+    msg.header.stamp.nsecs = timestamp_counter.nsecs
+    timestamp_counter += rospy.Duration(1)
+
+    pc_data = pc2.read_points(msg, field_names=("x", "y", "z"))
+    pointcloud_data_buffer.append(list(pc_data))
+
+    rospy.loginfo('Received PointCloud2 message: {}'.format(msg.header.stamp))
+    received_messages_count += 1
+
+def image_callback(msg):
+    global timestamp_counter, image_data_buffer, received_messages_count
+
+    msg.header.stamp = timestamp_counter
+
+    timestamp_counter += rospy.Duration(1)
+
+    cv_image = bridge.imgmsg_to_cv2(msg, desired_encoding="passthrough")
+    image_data_buffer.append(cv_image)
+
+    rospy.loginfo('Received Image message: {}'.format(msg.header.stamp))
+    received_messages_count += 1
+
+rospy.Subscriber('/point_cloud_topic', PointCloud2, pointcloud_callback)
+rospy.Subscriber('/image_topic', Image, image_callback)
+
+def timer_callback(event):
+    pass
+
+def write_data_to_files(image_data_buffer, pointcloud_data_buffer):
+    global image_counter, pointcloud_counter, generated_files_count
+
+    file_name = '{}/{}.jpg'.format(image_data_folder, str(image_counter).zfill(4))
+    cv2.imwrite(file_name, image_data_buffer[-1])
+    rospy.loginfo('Saved Image file: {}'.format(file_name))
+    image_counter += 1
+    generated_files_count += 1
+    file_name = '{}/{}.csv'.format(pointcloud_data_folder, str(pointcloud_counter).zfill(4))
+    with open(file_name, 'w') as csvfile:
+        csv_writer = csv.writer(csvfile)
+        csv_writer.writerow(["Points_m_XYZ:0", "Points_m_XYZ:1", "Points_m_XYZ:2"])
+        csv_writer.writerows(pointcloud_data_buffer[-1])
+    rospy.loginfo('Saved PointCloud file: {}'.format(file_name))
+    pointcloud_counter += 1
+    generated_files_count += 1
+
+rospy.Timer(rospy.Duration(0.3), timer_callback)
+
+orig_termios = termios.tcgetattr(sys.stdin)
+
+try:
+    tty.setcbreak(sys.stdin.fileno())
+
+    rospy.loginfo("Press Spacebar to stop the message reception...")
+
+    while not rospy.is_shutdown():
+        key = ord(sys.stdin.read(1))
+
+        if key == ord(' '):
+            write_data_to_files(image_data_buffer, pointcloud_data_buffer)
+
+            if received_messages_count == generated_files_count:
+                rospy.loginfo("All files have been saved.")
+                image_data_buffer = []
+                pointcloud_data_buffer = []
+                break
+
+except KeyboardInterrupt:
+    pass
+
+
+finally:
+    termios.tcsetattr(sys.stdin, termios.TCSADRAIN, orig_termios)
+
+
